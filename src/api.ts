@@ -1,6 +1,6 @@
 import type { GitSource, Repo, RepoApi } from "src/types/general";
-import { GithubRepoMeta } from "./api/github/getRepo";
 import { GithubBranch } from "./api/github/getRepoBranches";
+import { GithubRepoMeta } from "./types/req-resp";
 
 export const repoApi = <R extends Readonly<Repo>, B extends string, S extends GitSource>(
   repo: R,
@@ -17,15 +17,15 @@ export const repoApi = <R extends Readonly<Repo>, B extends string, S extends Gi
     source,
     defaultBranch: meta.default_branch,
 
-    switchToBranch(branch) {
-      return repoApi(repo, branch, source, auth, branches, meta) as RepoApi<R, typeof branch, S>;
+    switchToBranch(b) {
+      return repoApi(repo, b, source, auth, branches, meta);
     },
 
     buildSitemap(options) {
 
     },
 
-    commits() {
+    getCommits() {
       // 
     },
 

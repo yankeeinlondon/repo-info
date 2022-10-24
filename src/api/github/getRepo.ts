@@ -1,33 +1,22 @@
-
-import type { Endpoints } from "@octokit/types";
+import fetch, { Headers } from "node-fetch";
 import { GITHUB_API_BASE } from "src/constants";
+import { ApiRequestOptions, Repo } from "src/types/general";
+import { GithubRepoMeta } from "src/types/req-resp";
+import { fetchError } from "src/utils";
 
-export type GithubRepoMeta =
-  Endpoints["GET /repos/{owner}/{repo}"]["response"]["data"];
-
-export async function getRepo(repo: Repo): Promise<GithubRepoMeta> {
+export async function getRepo(repo: Repo, options: ApiRequestOptions) {
   const url = `${GITHUB_API_BASE}/repos/${repo}`;
-  const { github_token, github_user } = getEnv();
+  const { username, password } = options;
+  const headers = username && password
+    ? new Headers({ username, password })
+    : new Headers({});
 
-  
-  const res = await axios
-    .get<GithubRepoMeta>(url, {
-      httpAgent: "Tauri Search",
-      ...(github_token && github_user
-        ? { auth: { username: github_user, password: github_token } }
-        : {})
-    })
-    .catch((err) => {
-      if (axios.isAxiosError(err) && err.response) {
-        throw new Error(
-          `\nProblem calling Github API [repos, ${err.response.status}, ${url}]\n  - message: ${err.response.data?.message}`
-        );
-      } else {
-        throw new Error(
-          `\nProblem calling Github API [repos, ${url}]: ${err.message}`
-        );
-      }
-    });
+  const res = await fetch(url, { headers });
 
-  return res.data;
+  if(res.ok) {
+    const result = ( await res.json() ) as GithubRepoMeta;
+    return result;
+  } else {
+    throw fetchError(`Problem getting repo meta data.`, url, res)
+  }  
 }

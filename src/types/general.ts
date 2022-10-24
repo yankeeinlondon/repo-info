@@ -1,9 +1,11 @@
-import { RepoInfo } from "src/RepoInfo";
-
 export type Repo = `${string}/${string}`;
 export type GithubUrl = `https://github.com/${string}/${string}`;
 
-export interface RepoOptions {
+export interface RepoOptions<B extends string = 'default-branch'> {
+  /**
+   * The branch to start out in
+   */
+  branch?: B,
   /**
    * It's a good idea to provide an API _user_ and _token_ whenever
    * you use operate with a Repo's API. You may be able to make some
@@ -17,13 +19,6 @@ export interface RepoOptions {
     user: string;
     token: string;
   };
-  /**
-   * If you are addressing a branch which you know to have discrete set of branches
-   * then you can state them. This allows these branches to be used in a type strong
-   * way as soon as the API is ready. Note that there are branches you express as
-   * existing that in fact _do not_ an error will be thrown.
-   */
-  withBranches?: readonly string[];
 
 }
 
@@ -70,6 +65,14 @@ export interface Sitemap {
   root: SitemapDirectory;
 }
 
+export type ApiRequestOptions<T extends {} = {}> = {
+  username?: string;
+  password?: string;
+} & Partial<T>;
+
+/**
+ * An API surface for the specified Repo
+ */
 export type RepoApi<R extends Repo, B extends string, S extends GitSource> = {
   repo: Readonly<R>,
   branch: Readonly<B>,
@@ -97,7 +100,7 @@ export type RepoApi<R extends Repo, B extends string, S extends GitSource> = {
    */
   buildSitemap(options: SitemapOptions): any;
 
-  commits(): any;
+  getCommits(): any;
   metaData(): any;
   branches(): any;
   getFileContent(): Promise<string | undefined>;

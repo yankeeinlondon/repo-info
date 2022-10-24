@@ -1,15 +1,29 @@
-import { Endpoints } from "@octokit/types";
-import axios from "axios";
-import { GITHUB_API_BASE } from "~/constants";
+import { GITHUB_API_BASE } from "src/constants";
+import { ApiRequestOptions } from "src/types/general";
+import fetch, { Headers } from "node-fetch";
+import queryString from "query-string";
+import { fetchError } from "src/utils";
+import { GithubOrgBranchesQueryParams, GithubRepoMeta } from "src/types/req-resp";
+import { AlphaNumeric } from "inferred-types";
 
-export type OrgRepoLisReq = Endpoints["GET /orgs/{org}/repos"]["request"];
-export type OrgRepoLisResp = Endpoints["GET /orgs/{org}/repos"]["response"];
 
-export async function getOrgRepoList(org: string = "tauri-apps") {
-  const url = `${GITHUB_API_BASE}/orgs/${org}/repos?type=public&sort=updated&direction=desc&per_page=30&page=1`;
+export async function getOrgRepoList(
+  org: AlphaNumeric,
+  options: ApiRequestOptions<{qp: GithubOrgBranchesQueryParams}>
+): Promise<readonly GithubRepoMeta[]> {
+  const { username, password, qp } = options;
+  const params: GithubOrgBranchesQueryParams = { sort: "updated", direction: "desc", per_page: 30, ...qp };
+  const url = `${GITHUB_API_BASE}/orgs/${org}/repos?${queryString.stringify(params)}`;
+  const headers = username && password
+    ? new Headers({ username, password })
+    : new Headers({});
+  const res = await fetch(url, { headers });
 
-    const repos = axios.get<OrgRepoLisResp>(url);
-
-    return repos;
+  if (res.ok) {
+    const result = await res.json() as readonly GithubRepoMeta[];
+    return result;
+  } else {
+    throw fetchError(`Problem getting repos from the organization "${org}".`, url, res);
+  }
 
 }

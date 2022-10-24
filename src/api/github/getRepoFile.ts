@@ -1,6 +1,6 @@
-import { Repo } from "~/index";
-import { getUrl } from "../getUrl";
-import { getRepoDefaultBranch } from "./getRepoDefaultBranch";
+import { Repo } from "src/types/general";
+import { fetchError } from "src/utils";
+import fetch from "node-fetch";
 
 /**
  * Gets the raw content from a file in a github repo
@@ -12,11 +12,14 @@ import { getRepoDefaultBranch } from "./getRepoDefaultBranch";
 export async function getRepoFile(
   repo: Repo,
   filepath: string,
-  branch?: string
+  branch: string
 ) {
-  if (!branch) {
-    branch = await getRepoDefaultBranch(repo);
-  }
   const url = `https://raw.githubusercontent.com/${repo}/${branch}/${filepath}`;
-  return getUrl(url);
+  const res = await fetch(url);
+  if(res.ok) {
+    const content = res.text();
+    return content
+  } else {
+    throw fetchError(`Problems getting the file contents of "${filepath}" from branch "${branch}"`, url, res);
+  }
 }

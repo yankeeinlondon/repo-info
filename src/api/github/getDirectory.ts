@@ -1,7 +1,6 @@
-import { GITHUB_API_BASE } from "~/constants";
-import { getEnv } from "../getEnv/node/getEnv";
-import { GithubContentsResp, Repo } from "~/types";
-import axios from "axios";
+import { GITHUB_API_BASE } from "src/constants";
+import { ApiRequestOptions, Repo } from "src/types/general";
+
 
 export interface DirectoryOptions {
   branch?: string;
@@ -13,10 +12,10 @@ export interface DirectoryOptions {
 export async function getDirectory(
   repo: Repo,
   path: string,
-  o: DirectoryOptions = {}
+  branch: string,
+  options: ApiRequestOptions
 ) {
-  const { github_token, github_user } = getEnv();
-  const url = `${GITHUB_API_BASE}/repos/${repo}/contents/${path}?ref=${o.branch}`;
+  const url = `${GITHUB_API_BASE}/repos/${repo}/contents/${path}?ref=${branch}`;
 
   try {
     const res = await axios.get<GithubContentsResp>(url, {
