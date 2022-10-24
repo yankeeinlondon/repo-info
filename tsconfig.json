@@ -1,0 +1,38 @@
+{
+    "compilerOptions": {
+        "module": "ESNext",
+        "target": "ES2020",
+        "lib": [
+            "DOM"
+        ],
+        "moduleResolution": "node",
+        "strict": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "incremental": false,
+        "skipLibCheck": true,
+        "resolveJsonModule": true,
+        "noUnusedLocals": true,
+        "strictNullChecks": true,
+        "forceConsistentCasingInFileNames": true,
+        "baseUrl": ".",
+        "types": [
+            "vite/client"
+        ],
+        "paths": {
+            "src/*": [
+                "src/*"
+            ]
+        }
+    },
+    "include": [
+        "src",
+        "test",
+        "env.d.ts",
+        "env.d.ts"
+    ],
+    "exclude": [
+        "dist",
+        "node_modules"
+    ]
+}

@@ -1,0 +1,25 @@
+{
+    "name": "repo-info",
+    "description": "Provides an API surface for querying repos across Github and other Git hosts",
+    "type": "module",
+    "types": "./dist/index.d.ts",
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.js",
+    "author": {
+        "name": "Ken Snyder",
+        "email": "ken@ken.net"
+    },
+    "dependencies": {
+        "@octokit/types": "^8.0.0",
+        "inferred-types": "^0.24.0",
+        "node-fetch": "^3.2.10"
+    },
+    "devDependencies": {
+        "@types/node": "16",
+        "dotenv": "^16.0.3",
+        "npm-run-all": "^4.1.5",
+        "typescript": "^4.8.4",
+        "vite": "^3.1.8",
+        "vitest": "^0.24.3"
+    }
+}
