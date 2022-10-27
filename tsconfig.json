@@ -22,6 +22,9 @@
         "paths": {
             "src/*": [
                 "src/*"
+            ],
+            "test/*": [
+                "test/*"
             ]
         }
     },
@@ -29,7 +32,7 @@
         "src",
         "test",
         "env.d.ts",
-        "env.d.ts"
+        "vitest.config.ts"
     ],
     "exclude": [
         "dist",
