@@ -13,10 +13,11 @@
     "license": "MIT",
     "scripts": {
         "test": "vitest",
+        "test:ci": "vitest ci",
         "build": "tsup src/index.ts --format=esm,cjs --dts",
         "lint": "eslint src --ext ts,js,tsx,jsx --fix --no-error-on-unmatched-pattern",
         "audit:fix": "pnpm audit --fix",
-        "release": "run-s build lint release:latest audit:fix release:bump",
+        "release": "run-s build lint test:ci release:latest audit:fix release:bump",
         "release:latest": "pnpm install",
         "release:bump": "bumpp"
     },
@@ -31,6 +32,7 @@
         "@typescript-eslint/eslint-plugin": "^5.41.0",
         "@typescript-eslint/parser": "^5.41.0",
         "@vitest/ui": "^0.24.3",
+        "bumpp": "^8.2.1",
         "dotenv": "^16.0.3",
         "eslint": "^8.26.0",
         "eslint-config-prettier": "^8.5.0",
