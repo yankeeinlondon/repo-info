@@ -13,7 +13,7 @@
     "license": "MIT",
     "scripts": {
         "test": "vitest",
-        "test:ci": "vitest ci",
+        "test:ci": "vitest run",
         "build": "tsup src/index.ts --format=esm,cjs --dts",
         "lint": "eslint src --ext ts,js,tsx,jsx --fix --no-error-on-unmatched-pattern",
         "audit:fix": "pnpm audit --fix",
