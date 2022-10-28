@@ -21,3 +21,11 @@ const alt = await RepoInfo("https://github.com/org/repo");
 ### Use the API surface
 
 At the point the API surface has been created we have already pulled the basics of the repo's meta data as well as all the _branches_ which exist on the given repo.
+
+- `getReposInOrg()`
+- `getReadme()`
+- `getContentInRepo()`
+- `getCommits()`
+- `buildSitemap()`
+
+All types have comments and are hopefully fully self-documented.
