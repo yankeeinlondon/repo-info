@@ -1,5 +1,5 @@
 {
-    "name": "repo-info",
+    "name": "@yankeeinlondon/repo-info",
     "version": "0.2.0",
     "description": "Provides an API surface for querying repos across Github and other Git hosts",
     "type": "module",
