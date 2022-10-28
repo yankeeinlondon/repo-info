@@ -15,7 +15,7 @@ const repo = await RepoInfo("org/repo");
 const alt = await RepoInfo("https://github.com/org/repo");
 ```
 
-> Note: currently we only support Github but the intent is to be appopriately abstracted to support
+> Note: currently we only support Github but the intent is to be appropriately abstracted to support
 > other providers like **Gitlab** and **Bitbucket**
 
 ### Use the API surface

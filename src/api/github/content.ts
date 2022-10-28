@@ -1,7 +1,7 @@
 // transforms content from github into better format
 
 import { Url } from "src/types/general";
-import { GithubContent, RepoContent } from "src/types/req-resp";
+import { GithubContent, RepoContent, RepoSymLink } from "src/types/req-resp";
 
 
 
@@ -33,14 +33,14 @@ export const tightenUpContent = (content: readonly GithubContent[]): RepoContent
           break;
         }
         case "symlink": {
-          result.otherAssets.push({
+          result?.otherAssets?.push({
             kind: "symlink",
             sha: c.sha
-          });
+          } as RepoSymLink);
           break;
         }
         case "submodule": { 
-          result.otherAssets.push({
+          result?.otherAssets?.push({
             kind: "submodule",
             sha: c.sha,
             name: c.name
