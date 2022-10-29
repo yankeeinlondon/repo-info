@@ -1,6 +1,6 @@
 {
     "name": "@yankeeinlondon/repo-info",
-    "version": "0.2.2",
+    "version": "0.2.3",
     "description": "Provides an API surface for querying repos across Github and other Git hosts",
     "type": "module",
     "types": "./dist/index.d.ts",
@@ -11,6 +11,9 @@
         "email": "ken@ken.net"
     },
     "license": "MIT",
+    "files": [
+        "dist"
+    ],
     "scripts": {
         "test": "vitest",
         "test:ci": "vitest run",
