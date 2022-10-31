@@ -27,9 +27,34 @@ const alt = await RepoInfo("https://github.com/org/repo");
 > Note: currently we only support Github but the intent is to be appropriately abstracted to support
 > other providers like **Gitlab** and **Bitbucket**
 
-### Use the API surface
+### Partial Application
 
-At the point the API surface has been created we have already pulled the basics of the repo's meta data as well as all the _branches_ which exist on the given repo.
+A lot of time, it's useful to lazy load what you want to do but not start the _doing_ until later. This is in fact the default behavior of this library:
+
+```ts
+//  RepoConfig<"org/repo", "default-branch", "github", "none">
+const repo = RepoApi("org/repo");
+```
+
+This _synchronous_ operation simply configures what you'll want to do later with returned configuration object's `load()` method:
+
+```ts
+// RepoApi<"org/repo", "default-branch", "github", "none">
+const info = await repo.load();
+```
+
+Now the `info` hash provides a combination of useful information about the repo and it's branches but also an API surface which let's you explore further. It's all strongly typed with comments for the types in most cases so just use the surface as your documentation.
+
+> Note: if you thing lazy-loading is just _lazy_ then you can skip it by setting the option `{ loadNow: true }`.
+
+### Preloading More Meta
+
+When a **RepoInfo** type is created it pre-loads some information about the repo. By default this is just the following:
+
+- Repo Meta
+- Branch Info
+
+Beyond that it provides an API surface for things like:
 
 - `getReposInOrg()`
 - `getReadme()`
@@ -37,52 +62,34 @@ At the point the API surface has been created we have already pulled the basics 
 - `getCommits()`
 - `buildSitemap()`
 
-All types have comments and are hopefully fully self-documented.
+While that let's you extend beyond the base information you'll always get, you may know that you _always_ want certain information loaded along with the repo meta and branch info. This is possible via the initial options hash provided:
+
+```ts
+// RepoInfo<"org/repo", "default-branch", "github", "readme">
+const api = await RepoInfo("org/repo", { withReadme: true, loadNow: true })
+```
+
+In this case, stating that you know you'll want info on the repo's README.md file changes the surface of the API. You'll no longer have a `getReadme()` method but instead a `readme` property
+which is populated with the `ReadmeMarkdown` type.
+
+Not all endpoints are yet supported in this manner but you'll see in your editor which ones are just by exploring the options hash of RepoInfo.
 
 ### Branches
 
-The behavior of the API surface is _branch specific_ but in the examples so far we have not expressed which branch we want to be in. This is because, if you do not specify we will determine from the repo's meta information what the "default branch" and put you into that. This helps you hopefully move into the appropriate default without having to first investigate what that is.
-
-That said, you'll find the if you want to explicitly state the branch that's simply a matter of setting that property in the options hash. So if I wanted to make sure that I moved to the `feature/foobar` branch you'd do this with:
+Up to now all examples have shown us not expressing an explicit _branch_ we want to default to but by doing so we've ended seeing that our "type" includes reference to _default-branch_. Since we always get the repo's meta data and it knows which branch is the the "default branch" we can automatically set this for you but you can set it explicitly too if you prefer:
 
 ```ts
-const repo = await RepoInfo("org/repo", { branch: "feature/foobar" });
+// RepoConfig<"org/repo", "develop", "github", "none">
+const api = await RepoInfo("org/repo", { branch: "develop" });
 ```
 
-### More Info Upfront
-
-By default when you first instantiate your repo info you will be getting:
-
-- repo meta
-- repo branches
-
-If know you want _additional_ info up front then you can express that in the options parameter:
-
-```ts
-const repo = await RepoInfo("org/repo", {
-    withReadme: true,
-    withCommits: true,
-    withSitemap("/docs", { fileFilter: files }),
-})
-```
-
-Expressing this additional content will give you a slightly different API surface. For instance, since you asked for commits, there is now a `commits` property on the API with this data ready for you. In addition, the `getCommits()` which would typically a part of the API is replaced with `refreshCommits()` which will return you to the same API surface with an updated set of commits.
-
-### Partial Application
-
-Typically we do a bit of async work when you initiate your `RepoInfo` api but if you want to just configure it but not actually make any network calls yet you can do so with:
-
-```ts
-//  RepoApiLoader<"org/repo", "default-branch", "github">
-const repo = RepoApi("org/repo", { configOnly: true });
-```
-
-Now this variable is fully configured and can be activated with:
-
-```ts
-const info = await repo.load();
-```
+It will trust your knowledge of the actual branches when lazy loading the config but if when you load to an active API surface if we find that the branch doesn't exist then an error will be thrown.
 
 ## Contributing
 
 Happy for people to contribute with PRs. This repo's API _approach_ should be maintained but there is definitely plans to to _additively_ add other endpoints to the API surface when time permits and most self-evidently this library is intended to abstract the **git** vendor but currently is only implemented for **github** though it is _structured_ for this abstraction I am VERY happy if someone takes on **Bitbucket** and/or **Gitlab** which I am not currently working that much.
+
+One thing to bear in mind if you're considering contributing, I expect the following things:
+
+- unit tests in a similar level of granularity as what are already here to show your feature's contribution working along with any edge cases you're aware of
+- strong typing which preserves type literals where possible
