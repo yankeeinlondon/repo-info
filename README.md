@@ -1,5 +1,14 @@
 # Repo Info
 
+## Installation
+
+From the shell:
+
+```bash
+# choose your favorite package manager
+pnpm install @yankeeinlondon/repo-info
+```
+
 ## Usage
 
 ### Get The API surface
@@ -73,3 +82,7 @@ Now this variable is fully configured and can be activated with:
 ```ts
 const info = await repo.load();
 ```
+
+## Contributing
+
+Happy for people to contribute with PRs. This repo's API _approach_ should be maintained but there is definitely plans to to _additively_ add other endpoints to the API surface when time permits and most self-evidently this library is intended to abstract the **git** vendor but currently is only implemented for **github** though it is _structured_ for this abstraction I am VERY happy if someone takes on **Bitbucket** and/or **Gitlab** which I am not currently working that much.
