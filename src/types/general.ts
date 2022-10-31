@@ -1,5 +1,6 @@
 
 import { GithubOrgBranchesQueryParams } from "./github";
+import { RepoContent, RepoFile } from "./repo";
 
 export type Url = `https://${string}`;
 
