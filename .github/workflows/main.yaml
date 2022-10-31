@@ -20,7 +20,7 @@ jobs:
       nodeVersion: 16
     secrets:
       npm_token: ${{secrets.NPM_TOKEN}}
-      VITE_GH_TOKEN: ${{secrets.GH_TOKEN}}
+      gh_token: ${{secrets.GH_TOKEN}}
 
   do_not_publish:
     name: npm / no publication
