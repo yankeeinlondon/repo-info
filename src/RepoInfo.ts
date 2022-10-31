@@ -43,8 +43,10 @@ export const RepoInfo = <
     ) as string | undefined
   ];
 
+  const envSet = Object.keys(import.meta.env || {}).filter(i => i.startsWith("VITE_")).filter(i => env[i] && env[i].length > 0);
+
   if(!token) {
-    console.warn(`No auth token was found in ENV or passed into RepoInfo in the options hash; it is recommended that this be provided as anonymous clients have highly restricted caps. Available ENV properties were: ${Object.keys(import.meta.env || {}).filter(i => i.startsWith("VITE_"))}`);
+    console.warn(`No auth token was found in ENV or passed into RepoInfo in the options hash; it is recommended that this be provided as anonymous clients have highly restricted caps. Available Vite ENV values were: ${envSet}`);
   }
 
   const fetch = f({
