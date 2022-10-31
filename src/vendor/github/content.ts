@@ -1,9 +1,8 @@
 // transforms content from github into better format
 
 import { Url } from "src/types/general";
-import { GithubContent, RepoContent, RepoSymLink } from "src/types/github";
-
-
+import { GithubContent } from "src/types/github-types";
+import { RepoContent, RepoSymLink } from "src/types/repo";
 
 export const tightenUpContent = (content: readonly GithubContent[]): RepoContent => {
   const result: RepoContent = {

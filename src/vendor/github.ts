@@ -1,7 +1,7 @@
 import { mapTo } from "inferred-types";
 import { join } from "pathe";
 import { GITHUB_API_BASE } from "src/constants";
-import type { RepoProvider ,  FetchApi, Repo,  SitemapOptions,  GithubBranch, GithubContent, RepoMetadata, FlatSitemap, Sitemap, SitemapDirectory, RepoFile, GithubRepoMeta, RepoCommitsRequest, GithubCommitsQueryParams} from "src/types";
+import type { RepoProvider ,  FetchApi, Repo,  SitemapOptions,  GithubBranch, GithubContent, RepoMetadata, FlatSitemap, Sitemap, SitemapDirectory, RepoFile, GithubRepoMeta, RepoCommitsRequest, GithubCommitsQueryParams, GithubRepoIssue, RepoIssue} from "src/types";
 import { tightenUpContent } from "./github/content";
 
 const flattenSitemap = (smd: SitemapDirectory): RepoFile[] => {
@@ -66,7 +66,7 @@ const rawUrl = (repo: Repo, branch: string, filepath: string) =>
 const editorUrl = (repo: Repo, branch: string, filepath: string) => 
   `https://github.com/${repo}/blob/${branch}/${filepath}`;
 
-const api = <F extends FetchApi<any, any>>(fetch: F) => ({
+const api = <F extends FetchApi<any, any>>(fetch: F): RepoProvider => ({
   getRepoMeta(repo, _options) {
     const url = `${GITHUB_API_BASE}/repos/${repo}`;
     return fetch(url, "json", `Problems getting meta data on repo.`);
@@ -140,6 +140,14 @@ const api = <F extends FetchApi<any, any>>(fetch: F) => ({
     };
 
     return sitemap;
+  },
+
+  async getIssues(repo, options = {}) {
+    const url = `${GITHUB_API_BASE}/repos/${repo}/issues` as const;
+    const mapper = mapTo<GithubRepoIssue, RepoIssue>(i => [i]);
+    const resp: readonly GithubRepoIssue[] = await fetch(url, "json", "Problem getting content in the repo.", options);
+
+    return resp.flatMap(mapper) as readonly RepoIssue[];
   }
 } as RepoProvider);
 

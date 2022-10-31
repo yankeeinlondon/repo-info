@@ -1,5 +1,5 @@
 import { Repo, Url } from "./general";
-import { GithubBranch, GithubCommit, GithubCommitsQueryParams, GithubRepoIssue, GithubRepoMeta } from "./github";
+import { GithubBranch, GithubCommit, GithubCommitsQueryParams, GithubRepoIssue, GithubRepoIssuesParams, GithubRepoMeta } from "./github-types";
 
 export interface RepoFile {
   kind: "file";
@@ -27,7 +27,6 @@ export interface RepoSubmodule {
   name: string;
   sha: string;
 }
-
 
 /**
  * Info garnished for a particular directory in a Repo.
@@ -79,6 +78,7 @@ export type RepoCommit = GithubCommit;
 
 // TODO: abstract this from Github version
 export type RepoIssue = GithubRepoIssue;
+export type RepoIssueRequest = GithubRepoIssuesParams;
 
 // TODO: abstract this from Github version
 export type RepoMetadata = GithubRepoMeta;

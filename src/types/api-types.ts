@@ -1,8 +1,8 @@
 /* eslint-disable no-use-before-define */
 import { AlphaNumeric, Replace, UnionToTuple } from "inferred-types";
 import { BitbucketUrl, GithubUrl, GitSource, ReadmeMarkdown, Repo, RepoReference, SitemapOptions, Url } from "./general";
-import { GithubBranch, GithubCommit,  GithubCommitsQueryParams, GithubOrgBranchesQueryParams, GithubRepoMeta,  } from "./github";
-import { RepoCommit, RepoCommitOptions, RepoCommitsRequest, RepoContent, Sitemap } from "./repo";
+import { GithubBranch, GithubCommit,  GithubCommitsQueryParams, GithubOrgBranchesQueryParams, GithubRepoMeta,  } from "./github-types";
+import { RepoCommit, RepoCommitOptions, RepoCommitsRequest, RepoContent, RepoIssue, RepoIssueRequest, Sitemap } from "./repo";
 
 /**
  * Options provided to consumers in the construction of a RepoInfo API
@@ -203,7 +203,6 @@ export type RepoInfo<W extends string = never> = {
 } & RepoCache<W>;
 
 
-
 export type RepoProvider = {
   getRepoMeta(repo: Repo, options?: ApiRequestOptions): Promise<GithubRepoMeta>;
   getRepoBranches(repo: Repo, options?: ApiRequestOptions<GithubOrgBranchesQueryParams>): Promise<GithubBranch[]>;
@@ -227,4 +226,9 @@ export type RepoProvider = {
     org: AlphaNumeric, 
     options: ApiRequestOptions<GithubOrgBranchesQueryParams>
   ): Promise<readonly GithubRepoMeta[]>;
+
+  /**
+   * Get the Issues raised on the given repo
+   */
+  getIssues(repo: Repo, options: RepoIssueRequest): Promise<readonly RepoIssue[]>;
 };
