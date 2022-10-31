@@ -1,3 +1,4 @@
+import { BITBUCKET_API_BASE } from "src/constants";
 import { FetchApi,  RepoProvider } from "src/types";
 
 const api = <F extends FetchApi<any, any>>(_fetch: F) => ({
@@ -13,7 +14,8 @@ const api = <F extends FetchApi<any, any>>(_fetch: F) => ({
   async getReadme(_repo, _branch) {
     throw new Error("not implemented");
   },
-  async getCommits(_repo, _options = {}) {
+  async getCommits(repo, _options = {}) {
+    const _url = `${BITBUCKET_API_BASE}/repositories/${repo}/commits/` as const;
     throw new Error("not implemented");
   },
 
