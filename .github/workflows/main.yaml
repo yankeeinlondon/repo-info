@@ -4,11 +4,17 @@ on:
   push:
     branches:
       - main
+      - master
 
 jobs:
   testing:
     name: testing
     uses: yankeeinlondon/gha/.github/workflows/test.yml@main
+    secrets:
+      api_token: ${{secrets.API_TOKEN}}
+      gh_token: ${{secrets.GH_TOKEN}}
+      bitbucket_token: ${{secrets.BITBUCKET_TOKEN}}
+      gitlab_token: ${{secrets.GITLAB_TOKEN}}
 
   publish:
     name: npm
@@ -20,7 +26,6 @@ jobs:
       nodeVersion: 16
     secrets:
       npm_token: ${{secrets.NPM_TOKEN}}
-      gh_token: ${{secrets.GH_TOKEN}}
 
   do_not_publish:
     name: npm / no publication
