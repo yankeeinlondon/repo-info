@@ -1,10 +1,10 @@
 import {  literal,  UnionToTuple } from "inferred-types";
 import type { Repo, Url } from "src/types/general";
 import { f } from "src/f";
-import { bitbucket, github, gitlab } from "src/api/index";
+import { bitbucket, github, gitlab } from "src/vendor/index";
 import { extractRepoAndSource, getEnv } from "./utils";
-import { ApiWith,  RepoApi,  RepoCache, RepoConfig, RepoOptions, RepoProvider, ToRepo, ToSource } from "./types/api";
-import { repoApi } from "./api-implementation";
+import { ApiWith,  RepoApi,  RepoCache, RepoConfig, RepoOptions, RepoProvider, ToRepo, ToSource } from "./types/api-types";
+import { repoApi } from "./api";
 import { RepoCommitOptions } from "./types";
 
 /**
