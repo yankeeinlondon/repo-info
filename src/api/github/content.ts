@@ -1,7 +1,7 @@
 // transforms content from github into better format
 
 import { Url } from "src/types/general";
-import { GithubContent, RepoContent, RepoSymLink } from "src/types/req-resp";
+import { GithubContent, RepoContent, RepoSymLink } from "src/types/github";
 
 
 

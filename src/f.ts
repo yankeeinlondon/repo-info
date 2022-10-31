@@ -1,5 +1,5 @@
 import fetch, { Headers } from "node-fetch";
-import {  ApiRequestOptions, FetchGlobalOptions } from "./types/general";
+import type {  ApiRequestOptions, FetchGlobalOptions } from "./types";
 import { fetchError } from "src/utils";
 import qs from "query-string";
 

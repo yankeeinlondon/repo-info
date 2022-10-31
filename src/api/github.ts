@@ -1,8 +1,7 @@
-import { dictArr } from "inferred-types";
+import { mapTo } from "inferred-types";
 import { join } from "pathe";
 import { GITHUB_API_BASE } from "src/constants";
-import {  FetchApi, Repo, RepoProvider,  SitemapOptions } from "src/types/general";
-import { FlatSitemap, GithubBranch, GithubContent,  RepoFile,  Sitemap, SitemapDirectory } from "src/types/req-resp";
+import type { RepoProvider ,  FetchApi, Repo,  SitemapOptions,  GithubBranch, GithubContent, RepoMetadata, FlatSitemap, Sitemap, SitemapDirectory, RepoFile, GithubRepoMeta, RepoCommitsRequest, GithubCommitsQueryParams} from "src/types";
 import { tightenUpContent } from "./github/content";
 
 const flattenSitemap = (smd: SitemapDirectory): RepoFile[] => {
@@ -17,6 +16,8 @@ const flattenSitemap = (smd: SitemapDirectory): RepoFile[] => {
 
   return flat;
 };
+
+const metaMapper = mapTo<GithubRepoMeta, RepoMetadata>(r => [{...r}]);
 
 /**
  * recursively moves though repo content on behalf of the sitemap functionality
@@ -77,7 +78,7 @@ const api = <F extends FetchApi<any, any>>(fetch: F) => ({
   async getRepoBranches(repo, options) {
     const url = `${GITHUB_API_BASE}/repos/${repo}/branches`;
     const branches = await fetch(url, "json", `Issues getting the branches for the repo ${repo}`, options) as readonly GithubBranch[];
-    return dictArr(...branches).toLookup("name");
+    return branches;
   },
   async getReadme(repo, branch) {
     try {
@@ -97,25 +98,30 @@ const api = <F extends FetchApi<any, any>>(fetch: F) => ({
       };
     }
   },
-  async getCommits(repo, options) {
+  async getCommits(repo, options = {}) {
     const url = `${GITHUB_API_BASE}/repos/${repo}/commits` as const;
-    const resp = await fetch(url, "json", "Problems getting commits from repo.", options);
+    const mapper = mapTo<RepoCommitsRequest, GithubCommitsQueryParams>(i => [i]);
+    const resp = await fetch(url, "json", "Problems getting commits from repo.", mapper(options).pop());
     return resp;
   },
 
-  getReposInOrg(org, options) {
+  async getReposInOrg(org, options) {
     const url = `${GITHUB_API_BASE}/orgs/${org}/repos` as const;
-    return fetch(url, "json", `Problem getting repos from the organization "${org}".`, options);
+    
+    const repos = await fetch(url, "json", `Problem getting repos from the organization "${org}".`, options);
+
+    return repos.map(metaMapper);
   },
 
   async getContentInRepo(repo, branch, path) {
-    const url = `${GITHUB_API_BASE}/repos/${repo}/contents/${path}?ref=${branch}` as const;
+    const url = 
+      `${GITHUB_API_BASE}/repos/${repo}/contents/${path}?ref=${branch}` as const;
     const resp: readonly GithubContent[] = await fetch(url, "json", `Problem getting content in the repo."`);
     
     return tightenUpContent(resp);
   },
 
-  async buildSitemap(repo, branch, path, options) {
+  async buildSitemap(repo, branch, path, options = {}) {
     const root = await crawler(fetch, repo, branch, path, options);
     const sitemap: Sitemap = {
       repo,

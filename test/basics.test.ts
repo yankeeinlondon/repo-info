@@ -4,31 +4,32 @@ import { and, filter, not } from "inferred-types";
 
 describe("basics", () => {
   it("instantiating repo gathers meta and branches", async () => {
-    const gha = await RepoInfo(`yankeeinlondon/gha`);
+    const gha = await RepoInfo(`yankeeinlondon/gha`, { loadNow: true});
     
     expect(gha.branch).toBe("main");
     expect(gha.branchInfo.main).toBeTruthy();
     expect(gha.meta.name).toBe("gha");
   });
 
-  it("getting commits returns appropriate commit structure", async () => {
-    const gha = await RepoInfo(`yankeeinlondon/gha`);
+  it("getting commits returns appropriate commit array", async () => {
+    // eslint-disable-next-line unicorn/no-await-expression-member
+    const gha = await RepoInfo(`yankeeinlondon/gha`, { loadNow: true});
     const commits = await gha.getCommits();
     
     expect(Array.isArray(commits)).toBeTruthy();
     expect(typeof commits[0].sha).toBe("string");
   });
 
-  it.skip("getting README returns text when present", async () => {
-    const gha = await RepoInfo(`yankeeinlondon/gha`);
+  it("getting README returns text when present", async () => {
+    const gha = await RepoInfo(`yankeeinlondon/gha`, { loadNow: true});
     const readme = await gha.getReadme();
 
     expect(readme).toBeTruthy();
     expect(readme.content).includes("actions");
   });
 
-  it.skip("get a directory in repo", async () => {
-    const gha = await RepoInfo(`yankeeinlondon/gha`);
+  it("get a directory in repo", async () => {
+    const gha = await RepoInfo(`yankeeinlondon/gha`, { loadNow: true});
     const dir = await gha.getContentInRepo("");
 
     expect(Array.isArray(dir.subDirectories)).toBeTruthy();
@@ -37,8 +38,8 @@ describe("basics", () => {
     expect(typeof dir.files[0]).toBe("object");
   });
 
-  it.skip("build a sitemap ", async() => {
-    const tauri = await RepoInfo(`yankeeinlondon/gha`);
+  it("build a sitemap ", async() => {
+    const tauri = await RepoInfo(`yankeeinlondon/gha`, { loadNow: true });
     const yaml = and(
       filter({ endsWith: [".yaml", ".yml"]} ),
       not(filter({ startsWith: [".", "_"]}))

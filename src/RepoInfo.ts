@@ -1,74 +1,29 @@
-import { AlphaNumeric } from "inferred-types";
-import type { Repo, GithubUrl, RepoOptions, GitSource, RepoApi, RepoProvider } from "src/types/general";
-import { isGithubHrl } from "src/type-guards";
+import {  literal,  UnionToTuple } from "inferred-types";
+import type { Repo, Url } from "src/types/general";
 import { f } from "src/f";
-import { github } from "src/api/index";
-import { GithubBranch, GithubRepoMeta } from "src/types/req-resp";
-import { getEnv } from "./utils";
-
-
-export const repoApi = <R extends Readonly<Repo>, B extends string, S extends GitSource>(
-  repo: R,
-  branch: B,
-  source: S,
-  branches: {[key: string]: GithubBranch},
-  meta: GithubRepoMeta,
-  provider: RepoProvider
-): RepoApi<R,B,S> => {
-  const organization = repo.split("/")[1] as AlphaNumeric;
-  
-  return {
-    repo,
-    organization,
-    branch,
-    source,
-    defaultBranch: meta.default_branch,
-    meta,
-    listOfBranches: Object.keys(branches),
-    branchInfo: branches,
-
-    switchToBranch(b) {
-      return repoApi(repo, b, source, branches, meta, provider);
-    },
-
-    getCommits(options = {}) {
-      return provider.getCommits(repo, options);
-    },
-    getFileContent(filepath) {
-      return provider.getFileContent(repo, branch, filepath);
-    },
-    getReadme() {
-      return provider.getReadme(repo, branch);
-    },
-
-    getReposInOrg(org = organization, options = {}) {
-      return provider.getReposInOrg(org, options);
-    },
-
-    getContentInRepo(path) {
-      return provider.getContentInRepo(repo, branch, path);
-    },
-
-    buildSitemap(root, options = {}) {
-      return provider.buildSitemap(repo, branch, root, options);
-    },
-    
-  };
-};
+import { bitbucket, github, gitlab } from "src/api/index";
+import { extractRepoAndSource, getEnv } from "./utils";
+import { ApiWith,  RepoApi,  RepoCache, RepoConfig, RepoOptions, RepoProvider, ToRepo, ToSource } from "./types/api";
+import { repoApi } from "./api-implementation";
+import { RepoCommitOptions } from "./types";
 
 /**
  * Configure an API for a Repo you want to interrogate.
  * 
- * @param repo the `org/name` or `URL` of the repo you want an API for
+ * @param repoRep the `org/name` or `URL` of the repo you want an API for
  */
-export const RepoInfo = async <R extends Repo | GithubUrl, B extends string = "default-branch">(repo: R, branch?: B, options: RepoOptions = {} as RepoOptions) => {
+export const RepoInfo = <
+  TRep extends Repo | Url, 
+  TBranch extends string = "default-branch", 
+  TReadme extends boolean = false, 
+  TCommits extends boolean | RepoCommitOptions = false,
+  TLoadNow extends boolean = false
+>(
+  repoRep: TRep,
+  options: RepoOptions<TBranch,TReadme,TCommits,TLoadNow> = {} as RepoOptions<TBranch, TReadme,TCommits, TLoadNow>
+) => {
   const env = getEnv();
-  const r: Repo = isGithubHrl(repo)
-    ? repo.replace("https://github.com/", "") as R
-    : repo;
-
-  const source: GitSource = "github";
-
+  const {repo, source} = extractRepoAndSource(repoRep);
   const [username, token] = [
     (
       options.auth?.user || 
@@ -102,16 +57,86 @@ export const RepoInfo = async <R extends Repo | GithubUrl, B extends string = "d
       provider = github(fetch);
       break;
     }
+    case "bitbucket": {
+      provider = bitbucket(fetch);
+      break;
+    }
+    case "gitlab": {
+      provider = gitlab(fetch);
+      break;
+    }
+
     default: {
       throw new Error(`The git provider ${source} is not currently implemented!`);
     }
   }
 
-  const meta = await provider.getRepoMeta(repo, {username, password: token});
-  const branches = await provider.getRepoBranches(repo, {username, password: token});
-  const b = branch || meta.default_branch;
+  const cached = (
+    options.withCommits 
+      ? options.withReadme
+        ? ["readme", "commits"]
+        : ["commits"] 
+      : options.withReadme
+        ? ["readme"]
+        : ["none"]
+  ) as unknown as UnionToTuple<ApiWith<TReadme, TCommits>>;
 
-  return repoApi(r as R, b, source, branches, meta, provider) as RepoApi<R, B, typeof source>;
+  const buildApi = async() => {
+    const meta = await provider.getRepoMeta(repo);
+    const branches = await provider.getRepoBranches(repo);
+    const b = options.branch || literal(meta.default_branch);
+    
+    const readme = options.withReadme !== false ? await provider.getReadme(repo, b) : undefined;
+
+    const cache = {
+      cached,
+      meta,
+      branches,
+      ...(options.withCommits && options.withCommits !== false 
+          ? {
+            commits: await provider.getCommits(repo, options.withCommits === true 
+                ? {} 
+                : options.withCommits
+            )
+          }
+          : {}
+      ),
+      ...(options.withReadme !== false
+        ? { readme }
+        : {}
+      )
+    } as unknown as RepoCache<ApiWith<TReadme, TCommits>> ;
+
+    return repoApi(repo, b, source, provider, cache, options);
+  };
+
+
+  const repoConfig: RepoConfig<
+    ToRepo<TRep>,
+    TBranch, 
+    ToSource<TRep>, 
+    ApiWith<TReadme, TCommits>
+  > = {
+    repo,
+    branch: (options?.branch || literal("default-branch")) as Readonly<TBranch>,
+    source,
+    cached,
+
+    load: () => {
+      return  buildApi() as unknown as Promise<
+        RepoApi<ToRepo<TRep>, TBranch, ToSource<TRep>, ApiWith<TReadme, TCommits>>
+      >;
+    },
+  };
+
+
+  const rtn = options.loadNow !== true
+    ? repoConfig
+    : buildApi();
+
+  return rtn as TLoadNow extends false
+    ? RepoConfig<ToRepo<TRep>, TBranch, ToSource<TRep>, ApiWith<TReadme, TCommits>> 
+    : Promise<RepoApi<ToRepo<TRep>, TBranch, ToSource<TRep>, ApiWith<TReadme, TCommits>>>;
 };
 
 

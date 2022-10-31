@@ -1,6 +1,13 @@
-import { Endpoints, Url } from "@octokit/types";
+import { Endpoints } from "@octokit/types";
 import { OptionalProps, SimplifyObject } from "inferred-types";
-import { Repo } from "./general";
+
+
+export type GithubRepoIssuesParams = OptionalProps<
+  Endpoints["GET /issues"]["parameters"]
+>;
+
+export type GithubRepoIssue = 
+  Endpoints["GET /issues"]["response"]["data"][0];
 
 /**
  * Meta data about a given repo (API response)
@@ -58,73 +65,3 @@ export type GithubContent = {
     html_url: string | null;
     download_url: string | null;
 };
-
-export interface RepoFile {
-  kind: "file";
-  filename: string;
-  /**
-   * the directory path which holds the file
-   */
-  filepath: string;
-  sha: string;
-  size: number;
-  content?: string;
-  /** comes from the download_url prop on github and just presents the files content without any chrome */
-  raw_url: Url;
-  /** comes from the html_url prop on github */
-  url: Url;
-}
-
-export interface RepoSymLink {
-  kind: "symlink";
-  sha: string;
-}
-
-export interface RepoSubmodule {
-  kind: "submodule";
-  name: string;
-  sha: string;
-}
-
-
-/**
- * Info garnished for a particular directory in a Repo.
- * Unlike `SitemapDirectory` -- which is recursive -- 
- * this data structure only knows the _string_ name 
- * of the sub-directories.
- */
-export interface RepoContent {
-  dir: string;
-  files: RepoFile[];
-  subDirectories: string[];
-  otherAssets?: (RepoSymLink | RepoSubmodule)[];
-}
-
-/** 
- * A recursive structure designed to store directory info of a Sitemap 
- */
-export interface SitemapDirectory {
-  dir: string;
-  files: RepoFile[];
-  subDirectories: SitemapDirectory[];
-}
-
-export interface FlatSitemap {
-  repo: Repo;
-  branch: string;
-  /**
-   * The root filepath which the sitemap began at
-   */
-  path: string;
-  files: RepoFile[];
-}
-
-/**
- * A hierarchical sitemap built from a repo
- */
-export interface Sitemap {
-  repo: Repo;
-  branch: string;
-  root: SitemapDirectory;
-  flatten: () => FlatSitemap;
-}
