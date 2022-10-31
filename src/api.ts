@@ -29,12 +29,14 @@ export const repoApi = async <R extends Readonly<Repo>, B extends string, S exte
     buildSitemap(root, options = {}) {
       return provider.buildSitemap(repo, branch, root, options);
     },
-    getReposInOrg(org = organization, options = {}) {
-      return provider.getReposInOrg(org, options);
+    getReposInOrg(options = {}) {
+      return provider.getReposInOrg(organization, options);
     },
-
     getContentInRepo(path) {
       return provider.getContentInRepo(repo, branch, path);
+    },
+    getIssues(options) {
+      return provider.getIssues(repo, options);
     },
   };
 

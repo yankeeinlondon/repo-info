@@ -164,12 +164,30 @@ export type CoreApi<R extends Repo, B extends string, S extends GitSource> = {
  */
 export type AlwaysFetchApi = {
   /**
-   * Get the raw file content of a particular file
+   * Get the raw file content of a particular file in the repo
    */
   getFileContent(filepath: string): Promise<string>;
-  getReposInOrg(org: AlphaNumeric, options: ApiRequestOptions<GithubOrgBranchesQueryParams>): Promise<readonly GithubRepoMeta[]>;
+
+  /**
+   * Get a list of all the repos which reside in the organization you are
+   * currently working in.
+   */
+  getReposInOrg(options: GithubOrgBranchesQueryParams): Promise<readonly GithubRepoMeta[]>;
+  /**
+   * Look into a particular directory path of a repo and find the files
+   * as well as sub-directories which reside at that depth.
+   */
   getContentInRepo(path: string): Promise<RepoContent>;
+  /**
+   * Build a _sitemap_ of files and directories which reside under the 
+   * `root` filepath designated.
+   */
   buildSitemap(root: string, options: SitemapOptions): Promise<Sitemap>;
+
+  /**
+   * Get issues from the repository
+   */
+  getIssues(options: RepoIssueRequest): Promise<readonly RepoIssue[]>;
 };
 
 /**
