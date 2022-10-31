@@ -44,7 +44,7 @@ export const RepoInfo = <
   ];
 
   if(!token) {
-    console.warn(`No auth token was found in ENV or passed into RepoInfo in the options hash; it is recommended that this be provided as anonymous clients have highly restricted caps. Available ENV properties were: ${Object.keys(import.meta.env || {})}`);
+    console.warn(`No auth token was found in ENV or passed into RepoInfo in the options hash; it is recommended that this be provided as anonymous clients have highly restricted caps. Available ENV properties were: ${Object.keys(import.meta.env || {}).filter(i => i.startsWith("VITE_"))}`);
   }
 
   const fetch = f({
