@@ -1,7 +1,7 @@
 /* eslint-disable no-use-before-define */
-import { AlphaNumeric, MapTo, Replace, UnionToTuple } from "inferred-types";
-import { ApiRequestOptions } from "./fetch-types";
-import { BitbucketUrl, FetchApi, GithubUrl, GitSource, ReadmeMarkdown, Repo, RepoReference, SitemapOptions, Url } from "./general";
+import { AlphaNumeric,  Replace, UnionToTuple } from "inferred-types";
+import { ApiRequestOptions, FetchApi } from "./fetch-types";
+import { BitbucketUrl, GithubUrl, GitSource, ReadmeMarkdown, Repo, RepoReference, SitemapOptions, Url } from "./general";
 import { GithubBranch, GithubCommit,  GithubCommitsQueryParams, GithubOrgBranchesQueryParams, GithubRepoMeta,  } from "./github-types";
 import { RepoCommit, RepoCommitOptions, RepoCommitsRequest, RepoContent, RepoIssue, RepoIssueRequest, RepoMetadataRequest, Sitemap } from "./repo";
 
