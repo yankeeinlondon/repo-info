@@ -16,6 +16,13 @@ export type GithubRepoMeta =
   Endpoints["GET /repos/{owner}/{repo}"]["response"]["data"];
 
 /**
+ * Query params for getting metadata on repo
+ */
+ export type GithubMetadataRequest = OptionalProps<
+  Endpoints["GET /repos/{owner}/{repo}"]["parameters"]
+ >;
+
+/**
  * The optional props for Github Commits expressed as query parameters on a GET request.
  */
 export type GithubCommitsQueryParams = OptionalProps<
@@ -52,7 +59,7 @@ export type GithubContentsQueryParams = OptionalProps<
 >;
 
 // export type GithubContent = 
-//   Endpoints["GET /repos/{owner}/{repo}/contents/{path}"]["response"]["data"]
+//   Endpoints["GET /repos/{owner}/{repo}/contents/{path}"]["response"]["data"][]
 
 export type GithubContent = {
     type: "file" | "symlink" | "dir" | "submodule";

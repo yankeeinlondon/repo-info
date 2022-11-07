@@ -1,8 +1,9 @@
 /* eslint-disable no-use-before-define */
-import { AlphaNumeric, Replace, UnionToTuple } from "inferred-types";
-import { BitbucketUrl, GithubUrl, GitSource, ReadmeMarkdown, Repo, RepoReference, SitemapOptions, Url } from "./general";
+import { AlphaNumeric, MapTo, Replace, UnionToTuple } from "inferred-types";
+import { ApiRequestOptions } from "./fetch-types";
+import { BitbucketUrl, FetchApi, GithubUrl, GitSource, ReadmeMarkdown, Repo, RepoReference, SitemapOptions, Url } from "./general";
 import { GithubBranch, GithubCommit,  GithubCommitsQueryParams, GithubOrgBranchesQueryParams, GithubRepoMeta,  } from "./github-types";
-import { RepoCommit, RepoCommitOptions, RepoCommitsRequest, RepoContent, RepoIssue, RepoIssueRequest, Sitemap } from "./repo";
+import { RepoCommit, RepoCommitOptions, RepoCommitsRequest, RepoContent, RepoIssue, RepoIssueRequest, RepoMetadataRequest, Sitemap } from "./repo";
 
 /**
  * Options provided to consumers in the construction of a RepoInfo API
@@ -24,7 +25,7 @@ export interface RepoOptions<
    * is passed in a parameter is given precedence.
    */
   auth?: {
-    user: string;
+    user?: string;
     token: string;
   };
 
@@ -60,11 +61,11 @@ export interface RepoOptions<
 };
 
 export type ToRepo<T extends RepoReference> = T extends Url
-  ? ToSource<T> extends "github"
+  ? ToSource<T> extends GitSource.github
     ? Replace<T, "https://github.com/", "">
-    : ToSource<T> extends "bitbucket"
+    : ToSource<T> extends GitSource.bitbucket
       ? Replace<Replace<T, "https://bitbucket.org/", "">, "https://bitbucket.com/", "">
-      : ToSource<T> extends "gitlab"
+      : ToSource<T> extends GitSource.gitlab
         ? Replace<T, `https://gitlab.com/`, "">
         : never
   : T;
@@ -75,13 +76,14 @@ export type ToRepo<T extends RepoReference> = T extends Url
  */
 export type ToSource<T extends RepoReference> = T extends Url
   ? T extends GithubUrl
-    ? "github"
+    ? GitSource.github
     : T extends BitbucketUrl
-      ? "bitbucket"
+      ? GitSource.bitbucket
       : T extends `https://gitlab${string}`
-        ? "gitlab"
+        ? GitSource.gitlab
         : never
-  : "github";
+  // for now all non-URL based repos are github
+  : GitSource.github;
 
 export type ApiWith<
   TReadme extends boolean, 
@@ -109,7 +111,9 @@ export type RepoConvert<
   : RepoConfig<TRepo, TBranch, ToSource<TRepo>, ApiWith<TReadme, TCommits>>;
 
 
-export type ApiRequestOptions<T extends {} = {}> = T;
+
+
+
 
 /** the Commits based API surface; which depends on whether it's pre-loaded */
 export type CommitsApi<T extends boolean> = T extends true
@@ -220,26 +224,76 @@ export type RepoInfo<W extends string = never> = {
   meta: GithubRepoMeta;
 } & RepoCache<W>;
 
+/**
+ * If you are to provide a vendor/provider implementation then you
+ * must export this type as a default export of the give file.
+ * 
+ * - It receives a `FetchApi` to make all requests which helps to standardize
+ * IO as well as relieve the provider of having to be involved in those details
+ * - The main responsibility for each provider is to implement the API surface
+ * which is specified by the `ProviderApi`. This must be fully implemented in all
+ * cases, however, if you are doing a partial implementation to start you can
+ * return errors for endpoints you wish to implement later.
+ */
+export type RepoProvider = (fetch: FetchApi) => ProviderApi;
 
-export type RepoProvider = {
-  getRepoMeta(repo: Repo, options?: ApiRequestOptions): Promise<GithubRepoMeta>;
-  getRepoBranches(repo: Repo, options?: ApiRequestOptions<GithubOrgBranchesQueryParams>): Promise<GithubBranch[]>;
-    /**
-   * Builds a hierarchical sitemap structure of files in
-   * the repo.
+export type ProviderApi = {
+  /**
+   * **getRepoMeta**
+   * 
+   * get meta information about a specific hosted Repo.
+   */
+  getRepoMeta(repo: Repo, options?: ApiRequestOptions<RepoMetadataRequest>): Promise<GithubRepoMeta>;
+  /**
+   * **getRepoBranches**
+   * 
+   * get all the branches which a repo has along with some meta info on 
+   * each branch.
+   */
+  getRepoBranches(
+    repo: Repo, 
+    options?: ApiRequestOptions<GithubOrgBranchesQueryParams>
+  ): Promise<GithubBranch[]>;
+  /**
+   * **buildSitemap**
+   * 
+   * Builds a hierarchical sitemap structure of files in the repo.
    */
   buildSitemap(repo: Repo, branch: string, path: string, options?: SitemapOptions): Promise<Sitemap>;
-
+  /**
+   * **getCommits**
+   * 
+   * Get the _commits_ for a given repo.
+   */
   getCommits(repo: Repo, options?: RepoCommitsRequest): Promise<readonly GithubCommit[]>;
   /**
-   * Get the raw file content of a particular file
+   * **getFileContent**
+   * 
+   * Get the raw file content of a particular file.
    */
   getFileContent(repo: Repo, branch: string, filepath: string): Promise<string>;
 
+  /**
+   * **getReadme**
+   * 
+   * Will return a `ReadmeMarkdown` which includes the _content_ property if the repo
+   * has a `README.md` in the root directory.
+   */
   getReadme(repo: Repo, branch: string): Promise<ReadmeMarkdown>;
 
+  /**
+   * **getContentInRepo**
+   * 
+   * Retrieves all files, sub-directories, and even symlinks and other artifacts 
+   * for a _given directory path_ of the repo.
+   */
   getContentInRepo(repo: Repo, branch: string, path: string): Promise<RepoContent>;
 
+  /**
+   * **getReposInOrg**
+   * 
+   * Gets meta data for all repos which are part of the the given organization.
+   */
   getReposInOrg(
     org: AlphaNumeric, 
     options: ApiRequestOptions<GithubOrgBranchesQueryParams>

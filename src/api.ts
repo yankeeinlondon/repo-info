@@ -1,11 +1,11 @@
 import { AlphaNumeric, dictArr } from "inferred-types";
-import { AlwaysFetchApi, CommitsApi, CoreApi, GitSource, ReadmeApi, ReadmeMarkdown, Repo, RepoApi, RepoCache, RepoCommit, RepoOptions, RepoProvider } from "./types";
+import { AlwaysFetchApi, CommitsApi, CoreApi, GitSource, ReadmeApi, ReadmeMarkdown, Repo, RepoApi, RepoCache, RepoCommit, RepoOptions, ProviderApi } from "./types";
 
 export const repoApi = async <R extends Readonly<Repo>, B extends string, S extends GitSource, W extends string = "none">(
   repo: R,
   branch: B,
   source: S,
-  provider: RepoProvider,
+  provider: ProviderApi,
   cache: RepoCache<W>, 
   options: RepoOptions<B, any, any, any>
 ): Promise<RepoApi<R, B, S, W>> => {

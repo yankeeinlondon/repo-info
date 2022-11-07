@@ -2,7 +2,7 @@ import { RepoInfo } from "src/RepoInfo";
 import { extractRepoAndSource } from "src/utils";
 import { it, expect, describe } from "vitest";
 import { Expect, Equal } from "@type-challenges/utils";
-import { ApiWith, RepoApi, RepoConfig } from "src/types";
+import { ApiWith, GitSource, RepoApi, RepoConfig } from "src/types";
 import { UnionToTuple } from "inferred-types";
 
 describe("API types", () => {
@@ -70,9 +70,9 @@ describe("API types", () => {
     expect(api3.cached).toEqual(["none"]);
 
     type cases = [
-      Expect<Equal<A1, RepoConfig<"org/repo", "default-branch", "github", "none">>>,
-      Expect<Equal<A2, RepoConfig<"org/repo", "default-branch", "github", "none">>>,
-      Expect<Equal<A3, RepoConfig<"org/repo", "default-branch", "bitbucket", "none">>>,
+      Expect<Equal<A1, RepoConfig<"org/repo", "default-branch", GitSource.github, "none">>>,
+      Expect<Equal<A2, RepoConfig<"org/repo", "default-branch", GitSource.github, "none">>>,
+      Expect<Equal<A3, RepoConfig<"org/repo", "default-branch", GitSource.bitbucket, "none">>>,
     ];
     const cases: cases = [ true, true, true];
   });
@@ -88,7 +88,7 @@ describe("API types", () => {
     expect(Array.isArray(repo.listOfBranches)).toBeTruthy();
     
     type cases = [
-      Expect<Equal<R, RepoApi<"yankeeinlondon/gha", "default-branch", "github", "none">>>, //
+      Expect<Equal<R, RepoApi<"yankeeinlondon/gha", "default-branch", GitSource.github, "none">>>, //
     ];
     const cases: cases = [ true ];
   });
@@ -101,7 +101,7 @@ describe("API types", () => {
     expect(typeof api.getCommits).toBe("function");
 
     type cases = [
-      Expect<Equal<A, RepoApi<"yankeeinlondon/gha", "default-branch", "github", "none">>> //
+      Expect<Equal<A, RepoApi<"yankeeinlondon/gha", "default-branch", GitSource.github, "none">>> //
     ];
     const cases: cases = [ true ];
   });

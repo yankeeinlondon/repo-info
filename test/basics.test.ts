@@ -11,6 +11,13 @@ describe("basics", () => {
     expect(gha.meta.name).toBe("gha");
   });
 
+  it("getContentInRepo()", async () => {
+    const gha = await RepoInfo(`yankeeinlondon/gha`, { loadNow: true});
+    const info = await gha.getContentInRepo("/");
+    
+    expect(info.subDirectories).toContain(".vscode");
+  });
+
   it("getting commits returns appropriate commit array", async () => {
     // eslint-disable-next-line unicorn/no-await-expression-member
     const gha = await RepoInfo(`yankeeinlondon/gha`, { loadNow: true});

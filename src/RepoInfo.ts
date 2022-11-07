@@ -1,9 +1,9 @@
 import {  literal,  UnionToTuple } from "inferred-types";
-import type { Repo, Url } from "src/types/general";
-import { f } from "src/f";
+import { FetchWrapper, GitSource, Repo, Url } from "src/types/general";
+import { fetchWrapper } from "src/fetchWrapper";
 import { bitbucket, github, gitlab } from "src/vendor/index";
 import { extractRepoAndSource, getEnv } from "./utils";
-import { ApiWith,  RepoApi,  RepoCache, RepoConfig, RepoOptions, RepoProvider, ToRepo, ToSource } from "./types/api-types";
+import { ApiWith,  RepoApi,  RepoCache, RepoConfig, RepoOptions,  ToRepo, ToSource } from "./types/api-types";
 import { repoApi } from "./api";
 import { RepoCommitOptions } from "./types";
 
@@ -24,54 +24,45 @@ export const RepoInfo = <
 ) => {
   const env = getEnv();
   const {repo, source} = extractRepoAndSource(repoRep);
-  const [username, token] = [
-    (
-      options.auth?.user || 
-      env.VITE_GITHUB_USER || 
-      env.GITHUB_USER || 
-      env.GH_USER || 
-      env.VITE_GH_USER || 
-      undefined
-    ) as string | undefined,
-    (
-      options.auth?.token || 
-      env.GITHUB_TOKEN || 
-      env.VITE_GITHUB_TOKEN || 
-      env.GH_TOKEN || 
-      env.VITE_GH_TOKEN || 
-      undefined
-    ) as string | undefined
-  ];
+  let targetTokens: string[];
+  // The higher order provider function to be used
+  // once we hopefully have some auth data.
+  let p: FetchWrapper;
 
-  const envSet = Object.keys(import.meta.env || {}).filter(i => i.startsWith("VITE_")).filter(i => env[i] && env[i].length > 0);
-
-  if(!token) {
-    console.warn(`No auth token was found in ENV or passed into RepoInfo in the options hash; it is recommended that this be provided as anonymous clients have highly restricted caps. Available Vite ENV values were: ${envSet}`);
-  }
-
-  const fetch = f({
-    username,
-    password: token,
-  });
-  let provider: RepoProvider;
   switch(source) {
-    case "github": {
-      provider = github(fetch);
+    case GitSource.github: {
+      targetTokens = ["GITHUB_TOKEN", "VITE_GITHUB_TOKEN", "GH_TOKEN", "VITE_GH_TOKEN"];
+      p = github;
       break;
     }
-    case "bitbucket": {
-      provider = bitbucket(fetch);
+    case GitSource.bitbucket: {
+      targetTokens = ["BITBUCKET_TOKEN", "VITE_BITBUCKET_TOKEN"];
+      p = bitbucket;
       break;
     }
-    case "gitlab": {
-      provider = gitlab(fetch);
+    case GitSource.gitlab: {
+      targetTokens = ["GITLAB_TOKEN", "VITE_GITLAB_TOKEN"];
+      p = gitlab;
       break;
     }
-
-    default: {
-      throw new Error(`The git provider ${source} is not currently implemented!`);
+    case GitSource.unknown: {
+      throw new Error(`The host (aka., Github, Bitbucket, etc.) of the specified repo could not be determined!`);
     }
   }
+
+  // the ENV variable with a token in it
+  const tokenFound = options.auth?.token || targetTokens.find(t => env[t] && env[t].length > 0);
+
+  if(!tokenFound) {
+    console.warn(`No auth token was found in local ENV (or passed into RepoInfo in the options hash). It is strongly recommended that this be provided as anonymous clients have highly restricted caps. For a repo hosted on ${source} we look in the following ENV vars:\n  -${targetTokens.join("\n  - ")}`);
+  }
+
+    // build fetch wrapper
+    const fetch = fetchWrapper({
+      ...(tokenFound ? {token: env[tokenFound]} : {}),
+    });
+    // give provider the fetch wrapper
+    const provider: FetchWrapper = p(fetch);
 
   const cached = (
     options.withCommits 
@@ -116,7 +107,7 @@ export const RepoInfo = <
   const repoConfig: RepoConfig<
     ToRepo<TRep>,
     TBranch, 
-    ToSource<TRep>, 
+    GitSource, 
     ApiWith<TReadme, TCommits>
   > = {
     repo,

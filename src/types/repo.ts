@@ -1,5 +1,5 @@
 import { Repo, Url } from "./general";
-import { GithubBranch, GithubCommit, GithubCommitsQueryParams, GithubRepoIssue, GithubRepoIssuesParams, GithubRepoMeta } from "./github-types";
+import { GithubBranch, GithubCommit, GithubCommitsQueryParams, GithubMetadataRequest,  GithubRepoIssue, GithubRepoIssuesParams, GithubRepoMeta } from "./github-types";
 
 export interface RepoFile {
   kind: "file";
@@ -12,9 +12,9 @@ export interface RepoFile {
   size: number;
   content?: string;
   /** comes from the download_url prop on github and just presents the files content without any chrome */
-  raw_url: Url;
+  raw_url: Url | null;
   /** comes from the html_url prop on github */
-  url: Url;
+  url: Url | null;
 }
 
 export interface RepoSymLink {
@@ -70,6 +70,12 @@ export interface Sitemap {
   flatten: () => FlatSitemap;
 }
 
+/**
+ * The sort directionality specified for a query option
+ */
+export type RepoSortDirectionality = "asc" | "desc" | undefined;
+
+
 // TODO: abstract this from Github version
 export type RepoCommitsRequest = GithubCommitsQueryParams;
 
@@ -82,6 +88,7 @@ export type RepoIssueRequest = GithubRepoIssuesParams;
 
 // TODO: abstract this from Github version
 export type RepoMetadata = GithubRepoMeta;
+export type RepoMetadataRequest = GithubMetadataRequest;
 
 // TODO: abstract this from Github version
 export type RepoBranch = GithubBranch;

@@ -1,6 +1,6 @@
-import { FetchApi,  RepoProvider } from "src/types";
+import {  ProviderApi, RepoProvider } from "src/types";
 
-const api = <F extends FetchApi<any, any>>(_fetch: F) => ({
+const api: RepoProvider = (_fetch) => ({
   getRepoMeta(_repo, _options) {
     throw new Error("not implemented");
   },
@@ -25,13 +25,13 @@ const api = <F extends FetchApi<any, any>>(_fetch: F) => ({
     throw new Error("not implemented");
   },
 
-  buildSitemap(repo, branch, path, _options = {}) {
+  buildSitemap(_repo, _branch, _path, _options = {}) {
     throw new Error("not implemented");
   },
 
   getIssues(_repo, _options) {
     throw new Error("not implemented");
   },
-} as RepoProvider);
+} as ProviderApi);
 
 export default api;

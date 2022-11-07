@@ -1,7 +1,7 @@
 import { BITBUCKET_API_BASE } from "src/constants";
-import { FetchApi,  RepoProvider } from "src/types";
+import { RepoProvider } from "src/types";
 
-const api = <F extends FetchApi<any, any>>(_fetch: F) => ({
+const api: RepoProvider = (_fetch) => ({
   getRepoMeta(_repo, _options) {
     throw new Error("not implemented");
   },
@@ -33,6 +33,6 @@ const api = <F extends FetchApi<any, any>>(_fetch: F) => ({
   getIssues(_repo, _options) {
     throw new Error("not implemented");
   },
-} as RepoProvider);
+});
 
 export default api;
