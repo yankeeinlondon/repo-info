@@ -36,7 +36,7 @@ export type GithubBranchesQueryParams = OptionalProps<
   SimplifyObject<Endpoints["GET /repos/{owner}/{repo}/branches"]["parameters"]>
 >;
 
-export type GithubOrgBranchesQueryParams = OptionalProps<
+export type GithubOrgReposQueryParams = OptionalProps<
   SimplifyObject<Endpoints["GET /orgs/{org}/repos"]["parameters"]>
 >;
 

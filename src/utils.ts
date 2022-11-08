@@ -17,19 +17,19 @@ export const getEnv = (): ImportMetaEnv => {
 /**
  * An _identity_ mapper for cases where no mapper is needed
  */
-export const identity = <T extends {}>(i: T) => mapTo<T,T>(m => [m])(i);
+export const identity = <T>() =>  mapTo.oneToOne().map<T, T>(m => m);
 
 export const extractRepoAndSource = <TRep extends RepoReference>(r: TRep) => {
   if (r.startsWith("http")) {
     const repo = r.split("/").slice(-2).join("/") as ToRepo<TRep>;
-    const source = (
+    const source: GitSource = (
       r.startsWith("https://github.com")
-      ? GitSource.github
+      ? "github"
       : r.startsWith("https://bitbucket")
-        ? GitSource.bitbucket
+        ? "bitbucket"
         : r.startsWith("https://gitlab")
-          ? GitSource.gitlab
-          : GitSource.unknown
+          ? "gitlab"
+          : "unknown"
     );
     if (!source) {
       throw new Error(`Invalid Git source: ${r}`);

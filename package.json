@@ -18,7 +18,7 @@
         "test": "vitest",
         "test:ci": "vitest run",
         "build": "tsup src/index.ts --format=esm,cjs --dts",
-        "lint": "eslint src --ext ts,js,tsx,jsx --fix --no-error-on-unmatched-pattern",
+        "lint": "eslint src --ext ts,js,tsx,jsx --fix & tsc",
         "audit:fix": "pnpm audit --fix",
         "release": "run-s build lint test:ci release:latest audit:fix release:bump",
         "release:latest": "pnpm install",
@@ -28,7 +28,7 @@
         "@octokit/types": "^8.0.0",
         "brilliant-errors": "^0.6.0",
         "common-types": "^1.31.1",
-        "inferred-types": "^0.28.5",
+        "inferred-types": "^0.30.0",
         "node-fetch": "^3.2.10",
         "query-string": "^7.1.1"
     },

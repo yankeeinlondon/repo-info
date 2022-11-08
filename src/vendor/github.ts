@@ -1,7 +1,8 @@
 import {  mapTo } from "inferred-types";
 import { join } from "pathe";
 import { GITHUB_API_BASE } from "src/constants";
-import {  FetchApi, Repo,  SitemapOptions,  GithubBranch, GithubContent, RepoMetadata, FlatSitemap, Sitemap, SitemapDirectory, RepoFile, GithubRepoMeta, RepoCommitsRequest, GithubCommitsQueryParams, GithubRepoIssue, RepoIssue, RepoProvider, RepoBranch, ReadmeMarkdown, GithubCommit, RepoCommit, RespStructure, RepoContent, Url, RepoSymLink, RepoSubmodule} from "src/types";
+import {  FetchApi, Repo,  SitemapOptions,  GithubBranch, GithubContent, RepoMetadata, FlatSitemap, Sitemap, SitemapDirectory, RepoFile, GithubRepoMeta, GithubRepoIssue, RepoIssue, RepoProvider, RepoBranch, ReadmeMarkdown, GithubCommit, RepoCommit,  RepoContent, Url, RepoSymLink, RepoSubmodule} from "src/types";
+import { identity } from "src/utils";
 
 const flattenSitemap = (smd: SitemapDirectory): RepoFile[] => {
   let flat: RepoFile[] = [...smd.files];
@@ -19,7 +20,7 @@ const flattenSitemap = (smd: SitemapDirectory): RepoFile[] => {
 /**
  * Map Github's repo meta to the generalized `RepoMetadata`
  */
-const metaMapper = mapTo<GithubRepoMeta, RepoMetadata>(r => [{...r}]);
+const metaMapper = mapTo.oneToOne().map<GithubRepoMeta, RepoMetadata>(r => r);
 
 /**
  * recursively moves though repo content on behalf of the sitemap functionality
@@ -62,74 +63,69 @@ const crawler = async <F extends FetchApi>(
 };
 
 const rawUrl = (repo: Repo, branch: string, filepath: string) => 
-  `https://raw.githubusercontent.com/${repo}/${branch}/${filepath}`;
+  `https://raw.githubusercontent.com/${repo}/${branch}/${filepath}` as Url;
 
 const editorUrl = (repo: Repo, branch: string, filepath: string) => 
-  `https://github.com/${repo}/blob/${branch}/${filepath}`;
+  `https://github.com/${repo}/blob/${branch}/${filepath}` as Url;
 
 const api: RepoProvider = (fetch) => ({
-  getRepoMeta(repo, options) {
+  getRepoMeta(repo, qp) {
     const url = `${GITHUB_API_BASE}/repos/${repo}`;
-    return fetch(url, RespStructure.obj, metaMapper, options);
+    return fetch(url, "singular", metaMapper, {qp});
   },
   getFileContent(repo, branch, filepath) {
     const url = rawUrl(repo, branch, filepath);
     const mapper = mapTo<string, string>(m => [m]);
-    return fetch(url, RespStructure.text, mapper);
+    return fetch(url, "singular", mapper, { as: "text"} );
   },
-  async getRepoBranches(repo, options) {
+  async getRepoBranches(repo, qp) {
     const url = `${GITHUB_API_BASE}/repos/${repo}/branches`;
-    const mapper = mapTo<GithubBranch, RepoBranch>(b => [b]);
-    return fetch(
-      url, 
-      RespStructure.array, 
-      mapper, 
-      options
-    );
+    const mapper = mapTo.oneToOne().map<GithubBranch, RepoBranch>(b => b);
+    return fetch(url,"list",mapper,{ qp });
   },
   async getReadme(repo, branch) {
-    try {
-      const content: string = await api(fetch).getFileContent(repo, branch, "README.md");
-      return {
-        content,
-        editorUrl: editorUrl(repo, branch, "README.md"),
-        rawUrl: rawUrl(repo, branch, "README.md"),
-        exists: true
-      } as ReadmeMarkdown;
-    } catch {
-      return  {
-        content: undefined,
-        editorUrl: editorUrl(repo, branch, "README.md"),
-        rawUrl: rawUrl(repo, branch, "README.md"),
-        exists: false,
-      } as ReadmeMarkdown;
-    }
+    const url = rawUrl(repo, branch, "README.md") as Url;
+    const readme: ReadmeMarkdown = {
+      content: "",
+      exists: false,
+      rawUrl: rawUrl(repo, branch, "README.md"),
+      editorUrl: editorUrl(repo, branch, "README.md")
+    };
+    const mapper = mapTo
+      .oneToOne()
+      .map<string, ReadmeMarkdown>(i => ({
+        ...readme,
+        exists: true,
+        content: i
+      })
+    );
+    return fetch(url, "singular", mapper, { on404: (readme) => readme, as: "text" });
   },
 
-  async getCommits(repo, options = {}) {
+  async getCommits(repo, qp = {}) {
     const url = `${GITHUB_API_BASE}/repos/${repo}/commits` as const;
-    const reqMapper = mapTo<RepoCommitsRequest, GithubCommitsQueryParams>(i => [i]);
+    // const reqMapper = mapTo<RepoCommitsRequest, GithubCommitsQueryParams>(i => [i]);
     const respMapper = mapTo<GithubCommit, RepoCommit>(i => [i]);
-    const resp = await fetch<GithubCommit[]>(
-      url, 
-      RespStructure.array,
-      reqMapper,
-      options
-    );
-    return resp.flatMap(respMapper);
-  },
-
-  async getReposInOrg(org, options) {
-    const url = `${GITHUB_API_BASE}/orgs/${org}/repos` as const;
-    return await fetch(
+    return fetch(
       url,
-      RespStructure.obj,
-      metaMapper,
-      options
+      "list",
+      respMapper,
+      {qp}
     );
   },
 
-  async getContentInRepo(repo, branch, path) {
+  getReposInOrg(org, qp) {
+    const url = `${GITHUB_API_BASE}/orgs/${org}/repos` as const;
+    const mapper = identity<GithubRepoMeta>();
+    return fetch(
+      url,
+      "list",
+      mapper,
+      {qp}
+    );
+  },
+
+  getContentInRepo(repo, branch, path) {
     const url = 
       `${GITHUB_API_BASE}/repos/${repo}/contents/${path}?ref=${branch}` as const;
 
@@ -185,7 +181,7 @@ const api: RepoProvider = (fetch) => ({
       };
     });
 
-    return fetch(url, RespStructure.array, mapper);
+    return fetch(url, "singular", mapper, {});
   },
 
   async buildSitemap(repo, branch, path, options = {}) {
@@ -209,12 +205,15 @@ const api: RepoProvider = (fetch) => ({
     return sitemap;
   },
 
-  async getIssues(repo, options = {}) {
+  getIssues(repo, qp) {
     const url = `${GITHUB_API_BASE}/repos/${repo}/issues` as const;
-    const mapper = mapTo<GithubRepoIssue, RepoIssue>(i => [i]);
-    const resp: readonly GithubRepoIssue[] = await fetch(url, "json", "Problem getting content in the repo.", options);
-
-    return resp.flatMap(mapper) as readonly RepoIssue[];
+    const mapper = mapTo.oneToOne().map<GithubRepoIssue, RepoIssue>(i => i);
+    return fetch(
+      url, 
+      "list", 
+      mapper,
+      {qp}
+    );
   }
 });
 

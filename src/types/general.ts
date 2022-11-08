@@ -11,16 +11,7 @@ export type RepoReference = Repo | Url;
 /**
  * The platform/host which is hosting the repo
  */
-export enum GitSource {
-  /** the repo is hosted at Github */
-  "github" = "github",
-  /** the repo is hosted at Bitbucket */
-  "bitbucket" = "bitbucket",
-  /** the repo is hosted at GitLab */
-  "gitlab" = "gitlab",
-  /** ERROR: the source of the repo could not be determined */
-  "unknown" = "unknown"
-}
+export type GitSource  = "github" | "bitbucket" | "gitlab" | "unknown";
 
 export interface SitemapOptions {
   /**

@@ -15,7 +15,10 @@ describe("preload data when building API", () => {
     expect(Object.keys(gha)).not.contains("getCommits");
 
     type cases = [
-      Expect<Equal<A, RepoApi<"yankeeinlondon/gha", "default-branch", "github", "commits">>>
+      Expect<Equal<
+        A, //
+        RepoApi<"yankeeinlondon/gha", "default-branch", "github", "commits">
+      >>
     ];
     const cases: cases = [ true ];
   });

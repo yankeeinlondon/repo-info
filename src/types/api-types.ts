@@ -1,9 +1,9 @@
 /* eslint-disable no-use-before-define */
 import { AlphaNumeric,  Replace, UnionToTuple } from "inferred-types";
-import { ApiRequestOptions, FetchApi } from "./fetch-types";
+import { FetchRequestOptions, FetchApi } from "./fetch-types";
 import { BitbucketUrl, GithubUrl, GitSource, ReadmeMarkdown, Repo, RepoReference, SitemapOptions, Url } from "./general";
-import { GithubBranch, GithubCommit,  GithubCommitsQueryParams, GithubOrgBranchesQueryParams, GithubRepoMeta,  } from "./github-types";
-import { RepoCommit, RepoCommitOptions, RepoCommitsRequest, RepoContent, RepoIssue, RepoIssueRequest, RepoMetadataRequest, Sitemap } from "./repo";
+import { GithubBranch, GithubCommit,  GithubCommitsQueryParams, GithubOrgReposQueryParams, GithubRepoMeta,  } from "./github-types";
+import { RepoBranch, RepoCommit, RepoCommitOptions, RepoCommitsRequest, RepoContent, RepoIssue, RepoIssueRequest, RepoMetadata, RepoMetadataRequest, Sitemap } from "./repo";
 
 /**
  * Options provided to consumers in the construction of a RepoInfo API
@@ -61,11 +61,11 @@ export interface RepoOptions<
 };
 
 export type ToRepo<T extends RepoReference> = T extends Url
-  ? ToSource<T> extends GitSource.github
+  ? ToSource<T> extends "github"
     ? Replace<T, "https://github.com/", "">
-    : ToSource<T> extends GitSource.bitbucket
+    : ToSource<T> extends "bitbucket"
       ? Replace<Replace<T, "https://bitbucket.org/", "">, "https://bitbucket.com/", "">
-      : ToSource<T> extends GitSource.gitlab
+      : ToSource<T> extends "gitlab"
         ? Replace<T, `https://gitlab.com/`, "">
         : never
   : T;
@@ -76,14 +76,14 @@ export type ToRepo<T extends RepoReference> = T extends Url
  */
 export type ToSource<T extends RepoReference> = T extends Url
   ? T extends GithubUrl
-    ? GitSource.github
+    ? "github"
     : T extends BitbucketUrl
-      ? GitSource.bitbucket
+      ? "bitbucket"
       : T extends `https://gitlab${string}`
-        ? GitSource.gitlab
+        ? "gitlab"
         : never
   // for now all non-URL based repos are github
-  : GitSource.github;
+  : "github";
 
 export type ApiWith<
   TReadme extends boolean, 
@@ -133,7 +133,7 @@ export type CommitsApi<T extends boolean> = T extends true
   : {
     /** get the commits from the repo */
     getCommits(
-      options?: ApiRequestOptions<GithubCommitsQueryParams>
+      options?: FetchRequestOptions<GithubCommitsQueryParams>
     ): Promise<readonly RepoCommit[]>;
   };
 
@@ -176,7 +176,7 @@ export type AlwaysFetchApi = {
    * Get a list of all the repos which reside in the organization you are
    * currently working in.
    */
-  getReposInOrg(options: GithubOrgBranchesQueryParams): Promise<readonly GithubRepoMeta[]>;
+  getReposInOrg(options: GithubOrgReposQueryParams): Promise<readonly GithubRepoMeta[]>;
   /**
    * Look into a particular directory path of a repo and find the files
    * as well as sub-directories which reside at that depth.
@@ -243,7 +243,7 @@ export type ProviderApi = {
    * 
    * get meta information about a specific hosted Repo.
    */
-  getRepoMeta(repo: Repo, options?: ApiRequestOptions<RepoMetadataRequest>): Promise<GithubRepoMeta>;
+  getRepoMeta(repo: Repo, options?: FetchRequestOptions<RepoMetadataRequest>): Promise<RepoMetadata>;
   /**
    * **getRepoBranches**
    * 
@@ -252,8 +252,8 @@ export type ProviderApi = {
    */
   getRepoBranches(
     repo: Repo, 
-    options?: ApiRequestOptions<GithubOrgBranchesQueryParams>
-  ): Promise<GithubBranch[]>;
+    options?: FetchRequestOptions<GithubOrgReposQueryParams>
+  ): Promise<RepoBranch[]>;
   /**
    * **buildSitemap**
    * 
@@ -296,7 +296,7 @@ export type ProviderApi = {
    */
   getReposInOrg(
     org: AlphaNumeric, 
-    options: ApiRequestOptions<GithubOrgBranchesQueryParams>
+    options: FetchRequestOptions<GithubOrgReposQueryParams>
   ): Promise<readonly GithubRepoMeta[]>;
 
   /**

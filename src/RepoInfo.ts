@@ -1,11 +1,11 @@
 import {  literal,  UnionToTuple } from "inferred-types";
-import { FetchWrapper, GitSource, Repo, Url } from "src/types/general";
+import {  GitSource, Repo, Url } from "src/types/general";
 import { fetchWrapper } from "src/fetchWrapper";
 import { bitbucket, github, gitlab } from "src/vendor/index";
 import { extractRepoAndSource, getEnv } from "./utils";
-import { ApiWith,  RepoApi,  RepoCache, RepoConfig, RepoOptions,  ToRepo, ToSource } from "./types/api-types";
+import { ApiWith,  RepoApi,  RepoCache, RepoConfig, RepoOptions,  RepoProvider,  ToRepo, ToSource } from "./types/api-types";
 import { repoApi } from "./api";
-import { RepoCommitOptions } from "./types";
+import { FetchWrapper, RepoCommitOptions } from "./types";
 
 /**
  * Configure an API for a Repo you want to interrogate.
@@ -27,25 +27,25 @@ export const RepoInfo = <
   let targetTokens: string[];
   // The higher order provider function to be used
   // once we hopefully have some auth data.
-  let p: FetchWrapper;
+  let p: RepoProvider;
 
   switch(source) {
-    case GitSource.github: {
+    case "github": {
       targetTokens = ["GITHUB_TOKEN", "VITE_GITHUB_TOKEN", "GH_TOKEN", "VITE_GH_TOKEN"];
       p = github;
       break;
     }
-    case GitSource.bitbucket: {
+    case "bitbucket": {
       targetTokens = ["BITBUCKET_TOKEN", "VITE_BITBUCKET_TOKEN"];
       p = bitbucket;
       break;
     }
-    case GitSource.gitlab: {
+    case "gitlab": {
       targetTokens = ["GITLAB_TOKEN", "VITE_GITLAB_TOKEN"];
       p = gitlab;
       break;
     }
-    case GitSource.unknown: {
+    case "unknown": {
       throw new Error(`The host (aka., Github, Bitbucket, etc.) of the specified repo could not be determined!`);
     }
   }
