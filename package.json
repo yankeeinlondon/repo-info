@@ -3,6 +3,9 @@
     "version": "0.3.0",
     "description": "Provides an API surface for querying repos across Github and other Git hosts",
     "type": "module",
+    "repository": {
+        "url": "https://github.com/yankeeinlondon/repo-info"
+    },
     "types": "./dist/index.d.ts",
     "main": "./dist/index.cjs",
     "module": "./dist/index.js",
