@@ -59,7 +59,7 @@ export const repoApi = async <R extends Readonly<Repo>, B extends string, S exte
     } as CommitsApi<true>
     : {
       async getCommits(o) {
-        const commits: readonly RepoCommit[] = await provider.getCommits(repo, o || {});
+        const commits: readonly RepoCommit[] = await provider.getCommits(repo, o);
 
         return commits;
       }

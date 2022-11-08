@@ -1,6 +1,6 @@
 /* eslint-disable unicorn/switch-case-braces */
 import fetch, { Headers } from "node-fetch";
-import {  FetchWrapper } from "./types";
+import {  FetchGlobalOptions, FetchWrapper } from "./types";
 import { FetchError } from "src/errors/FetchError";
 import qs from "query-string";
 
@@ -10,7 +10,7 @@ import qs from "query-string";
  * A higher-order wrapper around `node-fetch` which receives default options for requests
  * up front and then provides back a _fetch-like_ API surface.
  */
-export const fetchWrapper: FetchWrapper = (config = {}) => async (
+export const fetchWrapper: FetchWrapper = (config = {} as FetchGlobalOptions) => async (
   url, 
   structure,
   respMapper,
@@ -43,12 +43,18 @@ export const fetchWrapper: FetchWrapper = (config = {}) => async (
     
     switch(structure) {
       case "list":
-        return respMapper(result as typeof respMapper["inputType"][]) as typeof respMapper["outputType"][];
+        return respMapper(result as typeof respMapper["inputType"][]) as typeof respMapper["outputType"][] as any;
       case "singular":
-        return respMapper(result as typeof respMapper["inputType"]) as typeof respMapper["outputType"];
+        return respMapper(result as typeof respMapper["inputType"]) as typeof respMapper["outputType"] as any;
     }
 
   } else {
+    if (options?.on404 && res.status === 404) {
+      // Note: the _any_ is ok here as the top-level FetchWrapper will
+      // ensure strong typing is preserved.
+      return options.on404 as any;
+    }
+
     const err = new FetchError(
       options?.errText || `\n[${res.status}, ${res.statusText}] Problems making API call to ${url}\nHeader variables passed in were: ${JSON.stringify(Object.keys(headers))}\n\n${res.statusText}`, 
       `fetch/${structure}`,

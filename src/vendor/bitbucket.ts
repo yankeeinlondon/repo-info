@@ -1,4 +1,4 @@
-import { BITBUCKET_API_BASE } from "src/constants";
+
 import { RepoProvider } from "src/types";
 
 const api: RepoProvider = (_fetch) => ({
@@ -14,8 +14,12 @@ const api: RepoProvider = (_fetch) => ({
   getReadme(_repo, _branch) {
     throw new Error("not implemented");
   },
-  getCommits(repo, _options = {}) {
-    const _url = `${BITBUCKET_API_BASE}/repositories/${repo}/commits/` as const;
+  getCommits(_repo, _qp = {}) {
+    // const url = `${BITBUCKET_API_BASE}/repositories/${repo}/commits/` as const;
+    // const mapper = mapTo
+    //   .oneToOne()
+    //   .map<BitbucketCommit, RepoCommit>(i => i);
+    // return fetch(url, "list", mapper, {qp});
     throw new Error("not implemented");
   },
 

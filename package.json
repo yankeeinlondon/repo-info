@@ -18,7 +18,7 @@
         "test": "vitest",
         "test:ci": "vitest run",
         "build": "tsup src/index.ts --format=esm,cjs --dts",
-        "lint": "eslint src --ext ts,js,tsx,jsx --fix & tsc",
+        "lint": "eslint src --ext ts,js,tsx,jsx --fix & tsc --noEmit",
         "audit:fix": "pnpm audit --fix",
         "release": "run-s build lint test:ci release:latest audit:fix release:bump",
         "release:latest": "pnpm install",

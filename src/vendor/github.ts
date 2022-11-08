@@ -69,19 +69,19 @@ const editorUrl = (repo: Repo, branch: string, filepath: string) =>
   `https://github.com/${repo}/blob/${branch}/${filepath}` as Url;
 
 const api: RepoProvider = (fetch) => ({
-  getRepoMeta(repo, qp) {
+  getRepoMeta(repo, options) {
     const url = `${GITHUB_API_BASE}/repos/${repo}`;
-    return fetch(url, "singular", metaMapper, {qp});
+    return fetch(url, "singular", metaMapper, options);
   },
   getFileContent(repo, branch, filepath) {
     const url = rawUrl(repo, branch, filepath);
     const mapper = mapTo<string, string>(m => [m]);
     return fetch(url, "singular", mapper, { as: "text"} );
   },
-  async getRepoBranches(repo, qp) {
+  async getRepoBranches(repo, options) {
     const url = `${GITHUB_API_BASE}/repos/${repo}/branches`;
     const mapper = mapTo.oneToOne().map<GithubBranch, RepoBranch>(b => b);
-    return fetch(url,"list",mapper,{ qp });
+    return fetch(url,"list",mapper, options);
   },
   async getReadme(repo, branch) {
     const url = rawUrl(repo, branch, "README.md") as Url;
@@ -99,10 +99,10 @@ const api: RepoProvider = (fetch) => ({
         content: i
       })
     );
-    return fetch(url, "singular", mapper, { on404: (readme) => readme, as: "text" });
+    return fetch(url, "singular", mapper, { on404: readme, as: "text" });
   },
 
-  async getCommits(repo, qp = {}) {
+  getCommits(repo, options) {
     const url = `${GITHUB_API_BASE}/repos/${repo}/commits` as const;
     // const reqMapper = mapTo<RepoCommitsRequest, GithubCommitsQueryParams>(i => [i]);
     const respMapper = mapTo<GithubCommit, RepoCommit>(i => [i]);
@@ -110,18 +110,18 @@ const api: RepoProvider = (fetch) => ({
       url,
       "list",
       respMapper,
-      {qp}
+      options || {}
     );
   },
 
-  getReposInOrg(org, qp) {
+  getReposInOrg(org, options) {
     const url = `${GITHUB_API_BASE}/orgs/${org}/repos` as const;
     const mapper = identity<GithubRepoMeta>();
     return fetch(
       url,
       "list",
       mapper,
-      {qp}
+      options
     );
   },
 
@@ -205,14 +205,14 @@ const api: RepoProvider = (fetch) => ({
     return sitemap;
   },
 
-  getIssues(repo, qp) {
+  getIssues(repo, options) {
     const url = `${GITHUB_API_BASE}/repos/${repo}/issues` as const;
     const mapper = mapTo.oneToOne().map<GithubRepoIssue, RepoIssue>(i => i);
     return fetch(
       url, 
       "list", 
       mapper,
-      {qp}
+      options
     );
   }
 });

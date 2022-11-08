@@ -1,15 +1,14 @@
 
-import { Mapper, EnumValues, FinalizedMapConfig } from "inferred-types";
+import { Mapper,  FinalizedMapConfig, Narrowable } from "inferred-types";
 import { HeadersInit } from "node-fetch";
 import { RepoSortDirectionality } from "./repo";
 
-export enum RespStructure {
-  /** a singular item of the given type */
-  "singular" = "singular",
-  /** a _list_ of items of the given type */
-  "list" = "list"
-}
-export type RespStructureValues = EnumValues<RespStructure>;
+/**
+ * Whether or not the inputs received from an endpoint are
+ * expected to be a `list` or a `singular` item of the given
+ * type.
+ */
+export type RespCardinality = "singular" | "list";
 
 export interface FetchGlobalOptions {
   /**
@@ -30,7 +29,7 @@ export interface FetchGlobalOptions {
 /**
  * Options available to any given API request
  */
-export type FetchRequestOptions<QP extends {} = {}> = {
+export type FetchRequestOptions<QP extends {} = {}, On404 extends Narrowable = void> = {
   /**
    * An API token to include in a particular request.
    * 
@@ -57,10 +56,16 @@ export type FetchRequestOptions<QP extends {} = {}> = {
    * If you want to handle 404 errors and return something other than
    * the error you can do so by using this configuration item.
    */
-  on404?: undefined | (<T>(t: T) => T);
+  on404?: On404;
 };
 
 export type ValidMapper = string | {};
+
+type Plus404Type<T, T404 extends Narrowable> = undefined extends T404
+  ? T
+  : T404 extends void
+    ? T
+    : T & T404;
 
 /**
  * **FetchApi**
@@ -74,9 +79,10 @@ export type ValidMapper = string | {};
  * ```
  */
 export type FetchApi = <
-  TStructure extends RespStructureValues,
+  TStructure extends RespCardinality,
   TMapper extends Mapper<ValidMapper,ValidMapper,FinalizedMapConfig<any, any, any>>,
-  TQueryParams extends {} = {}
+  TQueryParams extends {} = {},
+  TOn404 extends Narrowable = undefined
 >(
   /** the request URL you are calling */
   url: string,
@@ -89,10 +95,10 @@ export type FetchApi = <
    * library supports.
    */
   respMapper: TMapper,
-  options?: FetchRequestOptions<TQueryParams>
+  options?: FetchRequestOptions<TQueryParams, TOn404>
 ) => TStructure extends "list"
-    ? Promise<TMapper["outputType"][]>
-    : Promise<TMapper["outputType"]>;
+    ? Promise<Plus404Type<TMapper["outputType"][], TOn404>>
+    : Promise<Plus404Type<TMapper["outputType"], TOn404>>;
 
 /**
  * A higher order function which receives the global configuration

@@ -5,7 +5,7 @@ import { bitbucket, github, gitlab } from "src/vendor/index";
 import { extractRepoAndSource, getEnv } from "./utils";
 import { ApiWith,  RepoApi,  RepoCache, RepoConfig, RepoOptions,  RepoProvider,  ToRepo, ToSource } from "./types/api-types";
 import { repoApi } from "./api";
-import { FetchWrapper, RepoCommitOptions } from "./types";
+import {  RepoCommitOptions } from "./types";
 
 /**
  * Configure an API for a Repo you want to interrogate.
@@ -62,7 +62,7 @@ export const RepoInfo = <
       ...(tokenFound ? {token: env[tokenFound]} : {}),
     });
     // give provider the fetch wrapper
-    const provider: FetchWrapper = p(fetch);
+    const provider = p(fetch);
 
   const cached = (
     options.withCommits 
@@ -89,7 +89,7 @@ export const RepoInfo = <
           ? {
             commits: await provider.getCommits(repo, options.withCommits === true 
                 ? {} 
-                : options.withCommits
+                : { qp: options.withCommits }
             )
           }
           : {}

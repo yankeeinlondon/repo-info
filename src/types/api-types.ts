@@ -132,8 +132,8 @@ export type CommitsApi<T extends boolean> = T extends true
   }
   : {
     /** get the commits from the repo */
-    getCommits(
-      options?: FetchRequestOptions<GithubCommitsQueryParams>
+    getCommits<T404 = void>(
+      options?: FetchRequestOptions<GithubCommitsQueryParams, T404>
     ): Promise<readonly RepoCommit[]>;
   };
 
@@ -176,7 +176,7 @@ export type AlwaysFetchApi = {
    * Get a list of all the repos which reside in the organization you are
    * currently working in.
    */
-  getReposInOrg(options: GithubOrgReposQueryParams): Promise<readonly GithubRepoMeta[]>;
+  getReposInOrg(options: FetchRequestOptions<GithubOrgReposQueryParams>): Promise<readonly GithubRepoMeta[]>;
   /**
    * Look into a particular directory path of a repo and find the files
    * as well as sub-directories which reside at that depth.
@@ -191,7 +191,7 @@ export type AlwaysFetchApi = {
   /**
    * Get issues from the repository
    */
-  getIssues(options: RepoIssueRequest): Promise<readonly RepoIssue[]>;
+  getIssues<T404>(options: FetchRequestOptions<RepoIssueRequest, T404>): Promise<readonly RepoIssue[]>;
 };
 
 /**
@@ -265,7 +265,7 @@ export type ProviderApi = {
    * 
    * Get the _commits_ for a given repo.
    */
-  getCommits(repo: Repo, options?: RepoCommitsRequest): Promise<readonly GithubCommit[]>;
+  getCommits<T404>(repo: Repo, options?:FetchRequestOptions<RepoCommitsRequest, T404>): Promise<readonly GithubCommit[]>;
   /**
    * **getFileContent**
    * 
@@ -294,13 +294,13 @@ export type ProviderApi = {
    * 
    * Gets meta data for all repos which are part of the the given organization.
    */
-  getReposInOrg(
+  getReposInOrg<T404>(
     org: AlphaNumeric, 
-    options: FetchRequestOptions<GithubOrgReposQueryParams>
+    options: FetchRequestOptions<GithubOrgReposQueryParams, T404>
   ): Promise<readonly GithubRepoMeta[]>;
 
   /**
    * Get the Issues raised on the given repo
    */
-  getIssues(repo: Repo, options: RepoIssueRequest): Promise<readonly RepoIssue[]>;
+  getIssues<T404>(repo: Repo, options: FetchRequestOptions<RepoIssueRequest, T404>): Promise<readonly RepoIssue[]>;
 };
