@@ -31,7 +31,6 @@
     "dependencies": {
         "@octokit/types": "^8.0.0",
         "brilliant-errors": "^0.6.0",
-        "common-types": "^1.31.1",
         "inferred-types": "^0.30.0",
         "node-fetch": "^3.2.10",
         "query-string": "^7.1.1"
