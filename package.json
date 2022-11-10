@@ -6,9 +6,9 @@
     "repository": {
         "url": "https://github.com/yankeeinlondon/repo-info"
     },
-    "types": "./dist/index.d.ts",
-    "main": "./dist/index.cjs",
-    "module": "./dist/index.js",
+    "types": "dist/index.d.ts",
+    "main": "dist/index.cjs",
+    "module": "dist/index.js",
     "author": {
         "name": "Ken Snyder",
         "email": "ken@ken.net"
@@ -25,7 +25,8 @@
         "audit:fix": "pnpm audit --fix",
         "release": "run-s build lint test:ci release:latest audit:fix release:bump",
         "release:latest": "pnpm install",
-        "release:bump": "bumpp"
+        "release:bump": "bumpp",
+        "prepublishOnly": "npm run build"
     },
     "dependencies": {
         "@octokit/types": "^8.0.0",
