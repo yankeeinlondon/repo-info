@@ -9,6 +9,13 @@
     "types": "dist/index.d.ts",
     "main": "dist/index.cjs",
     "module": "dist/index.js",
+    "exports": {
+        ".": {
+            "import": "./dist/index.js",
+            "require": "./dist/index.cjs",
+            "default": "./dist/index.js"
+        }
+    },
     "author": {
         "name": "Ken Snyder",
         "email": "ken@ken.net"
@@ -20,7 +27,7 @@
     "scripts": {
         "test": "vitest",
         "test:ci": "vitest run",
-        "build": "tsup src/index.ts --format=esm,cjs --dts",
+        "build": "tsup src/index.ts --format=esm,cjs --dts --clean",
         "lint": "eslint src --ext ts,js,tsx,jsx --fix & tsc --noEmit",
         "audit:fix": "pnpm audit --fix",
         "release": "run-s build lint test:ci release:latest audit:fix release:bump",
@@ -30,31 +37,31 @@
     },
     "dependencies": {
         "@octokit/types": "^8.0.0",
-        "brilliant-errors": "^0.6.0",
-        "inferred-types": "^0.30.0",
-        "node-fetch": "^3.2.10",
+        "brilliant-errors": "^0.6.1",
+        "inferred-types": "^0.33.2",
+        "node-fetch": "^3.3.0",
         "query-string": "^7.1.1"
     },
     "devDependencies": {
         "@type-challenges/utils": "^0.1.1",
         "@types/node": "^16.18.3",
-        "@typescript-eslint/eslint-plugin": "^5.42.1",
-        "@typescript-eslint/parser": "^5.42.1",
-        "@vitest/ui": "^0.25.0",
+        "@typescript-eslint/eslint-plugin": "^5.45.0",
+        "@typescript-eslint/parser": "^5.45.0",
+        "@vitest/ui": "^0.25.3",
         "bumpp": "^8.2.1",
         "dotenv": "^16.0.3",
-        "eslint": "^8.27.0",
+        "eslint": "^8.28.0",
         "eslint-config-prettier": "^8.5.0",
         "eslint-plugin-import": "^2.26.0",
         "eslint-plugin-prettier": "^4.2.1",
         "eslint-plugin-promise": "^6.1.1",
-        "eslint-plugin-unicorn": "^44.0.2",
+        "eslint-plugin-unicorn": "^45.0.1",
         "npm-run-all": "^4.1.5",
-        "pathe": "^0.3.9",
-        "prettier": "^2.7.1",
-        "tsup": "^6.4.0",
-        "typescript": "^4.8.4",
-        "vite": "^3.2.3",
-        "vitest": "^0.25.0"
+        "pathe": "^1.0.0",
+        "prettier": "^2.8.0",
+        "tsup": "^6.5.0",
+        "typescript": "^4.9.3",
+        "vite": "^3.2.4",
+        "vitest": "^0.25.3"
     }
 }
