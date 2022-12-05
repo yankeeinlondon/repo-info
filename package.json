@@ -1,6 +1,6 @@
 {
     "name": "@yankeeinlondon/repo-info",
-    "version": "0.3.3",
+    "version": "0.3.4",
     "description": "Provides an API surface for querying repos across Github and other Git hosts",
     "type": "module",
     "repository": {
