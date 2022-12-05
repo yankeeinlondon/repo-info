@@ -79,7 +79,7 @@ export const RepoInfo = <
     const branches = await provider.getRepoBranches(repo);
     const b = options.branch || literal(meta.default_branch);
     
-    const readme = options.withReadme !== false ? await provider.getReadme(repo, b) : undefined;
+    const readme = options.withReadme === false ? undefined : await provider.getReadme(repo, b);
 
     const cache = {
       cached,
@@ -94,9 +94,9 @@ export const RepoInfo = <
           }
           : {}
       ),
-      ...(options.withReadme !== false
-        ? { readme }
-        : {}
+      ...(options.withReadme === false
+        ? {}
+        : { readme }
       )
     } as unknown as RepoCache<ApiWith<TReadme, TCommits>> ;
 
@@ -123,9 +123,9 @@ export const RepoInfo = <
   };
 
 
-  const rtn = options.loadNow !== true
-    ? repoConfig
-    : buildApi();
+  const rtn = options.loadNow === true
+    ? buildApi()
+    : repoConfig;
 
   return rtn as TLoadNow extends false
     ? RepoConfig<ToRepo<TRep>, TBranch, ToSource<TRep>, ApiWith<TReadme, TCommits>> 
