@@ -1,4 +1,4 @@
-import type { FinalizedMapConfig, Mapper, Narrowable } from "inferred-types";
+import type { AnyObject, EmptyObject, FinalizedMapConfig, Mapper, Narrowable } from "inferred-types";
 import type { HeadersInit } from "node-fetch";
 import type { RepoSortDirectionality } from "./repo";
 
@@ -28,7 +28,7 @@ export interface FetchGlobalOptions {
 /**
  * Options available to any given API request
  */
-export interface FetchRequestOptions<QP extends {} = {}, On404 extends Narrowable = void> {
+export interface FetchRequestOptions<QP extends AnyObject = EmptyObject, On404 extends Narrowable = void> {
   /**
    * An API token to include in a particular request.
    *
@@ -58,7 +58,7 @@ export interface FetchRequestOptions<QP extends {} = {}, On404 extends Narrowabl
   on404?: On404;
 }
 
-export type ValidMapper = string | {};
+export type ValidMapper = string | EmptyObject;
 
 type Plus404Type<T, T404 extends Narrowable> = undefined extends T404
   ? T
@@ -80,7 +80,7 @@ type Plus404Type<T, T404 extends Narrowable> = undefined extends T404
 export type FetchApi = <
   TStructure extends RespCardinality,
   TMapper extends Mapper<ValidMapper, ValidMapper, FinalizedMapConfig<any, any, any>>,
-  TQueryParams extends {} = {},
+  TQueryParams extends AnyObject = EmptyObject,
   TOn404 extends Narrowable = undefined,
 >(
   /** the request URL you are calling */

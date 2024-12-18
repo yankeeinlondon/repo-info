@@ -1,5 +1,27 @@
-import type { FetchApi, FlatSitemap, GithubBranch, GithubCommit, GithubContent, GithubRepoIssue, GithubRepoMeta, ReadmeMarkdown, Repo, RepoBranch, RepoCommit, RepoContent, RepoFile, RepoIssue, RepoMetadata, RepoProvider, RepoSubmodule, RepoSymLink, Sitemap, SitemapDirectory, SitemapOptions, Url } from "src/types";
-import { mapTo } from "inferred-types";
+import type {
+  FetchApi,
+  FlatSitemap,
+  GithubBranch,
+  GithubCommit,
+  GithubContent,
+  GithubRepoIssue,
+  GithubRepoMeta,
+  ReadmeMarkdown,
+  Repo,
+  RepoBranch,
+  RepoCommit,
+  RepoContent,
+  RepoFile,
+  RepoIssue,
+  RepoMetadata,
+  RepoProvider,
+  RepoSubmodule,
+  RepoSymLink,
+  Sitemap,
+  SitemapDirectory,
+  SitemapOptions,
+  Url,
+} from "src/types";
 import { join } from "pathe";
 import { GITHUB_API_BASE } from "src/constants";
 import { identity } from "src/utils";

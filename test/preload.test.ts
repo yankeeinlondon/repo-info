@@ -2,7 +2,6 @@ import type { Equal, Expect } from "@type-challenges/utils";
 import type { RepoApi } from "src/types";
 import { RepoInfo } from "src/RepoInfo";
 import { describe, expect, it } from "vitest";
-// import { and, filter, not } from "inferred-types";
 
 describe("preload data when building API", () => {
   it("pre-load commits", async () => {
@@ -13,13 +12,13 @@ describe("preload data when building API", () => {
     expect(gha.getMoreCommits).instanceOf(Function);
     expect(Object.keys(gha)).not.contains("getCommits");
 
-    type cases = [
+    // @ts-ignore
+    type _cases = [
       Expect<Equal<
         A, //
         RepoApi<"yankeeinlondon/gha", "default-branch", "github", "commits">
       >>,
     ];
-    const cases: cases = [true];
   });
 
   it("pre-load readme", async () => {
@@ -29,9 +28,9 @@ describe("preload data when building API", () => {
     expect(typeof gha.readme).toBe("object");
     expect(Object.keys(gha)).not.contains("getReadme");
 
-    type cases = [
+    // @ts-ignore
+    type _cases = [
       Expect<Equal<A, RepoApi<"yankeeinlondon/gha", "default-branch", "github", "readme">>>,
     ];
-    const cases: cases = [true];
   });
 });

@@ -21,7 +21,9 @@ export default antfu(
     },
     typescript: {
       overrides: {
-        "ts/explicit-function-return-type": ["off"]
+        "ts/explicit-function-return-type": ["off"],
+        "ts/ban-ts-comment": ["off"],
+        "ts/no-use-before-define": ["warn"]        
       }
     },
   }

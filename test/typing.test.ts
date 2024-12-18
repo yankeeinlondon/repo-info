@@ -17,7 +17,8 @@ describe("aPI types", () => {
     type T3 = UnionToTuple<A3>;
     type T4 = UnionToTuple<A4>;
 
-    type cases = [
+    // @ts-ignore
+    type _cases = [
       Expect<Equal<A1, "readme">>,
       Expect<Equal<A2, "commits">>,
       Expect<Equal<A3, "readme" | "commits">>,
@@ -28,7 +29,6 @@ describe("aPI types", () => {
       Expect<Equal<T3, ["readme", "commits"]>>,
       Expect<Equal<T4, ["none"]>>,
     ];
-    const cases: cases = [true, true, true, true, true, true, true, true];
   });
 
   it("extractRepoAndSource() util works in type-strong manner", () => {
@@ -68,12 +68,12 @@ describe("aPI types", () => {
     expect(api3.repo).toBe("org/repo");
     expect(api3.cached).toEqual(["none"]);
 
-    type cases = [
+    // @ts-ignore
+    type _cases = [
       Expect<Equal<A1, RepoConfig<"org/repo", "default-branch", "github", "none">>>,
       Expect<Equal<A2, RepoConfig<"org/repo", "default-branch", "github", "none">>>,
       Expect<Equal<A3, RepoConfig<"org/repo", "default-branch", "bitbucket", "none">>>,
     ];
-    const cases: cases = [true, true, true];
   });
 
   it("loading a partially applied API results in correct type", async () => {
@@ -86,10 +86,10 @@ describe("aPI types", () => {
     expect(repo.meta.name).toBe("gha");
     expect(Array.isArray(repo.listOfBranches)).toBeTruthy();
 
-    type cases = [
+    // @ts-ignore
+    type _cases = [
       Expect<Equal<R, RepoApi<"yankeeinlondon/gha", "default-branch", "github", "none">>>, //
     ];
-    const cases: cases = [true];
   });
 
   it("loadNow returns immediately with a RepoApi", async () => {
@@ -99,9 +99,9 @@ describe("aPI types", () => {
     expect(api.repo).toBe("yankeeinlondon/gha");
     expect(typeof api.getCommits).toBe("function");
 
-    type cases = [
+    // @ts-ignore
+    type _cases = [
       Expect<Equal<A, RepoApi<"yankeeinlondon/gha", "default-branch", "github", "none">>>, //
     ];
-    const cases: cases = [true];
   });
 });
