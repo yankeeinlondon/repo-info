@@ -1,20 +1,20 @@
 // transforms content from github into better format
 
-import { Url } from "src/types/general";
-import { GithubContent } from "src/types/github-types";
-import { RepoContent, RepoSymLink } from "src/types/repo";
+import type { Url } from "src/types/general";
+import type { GithubContent } from "src/types/github-types";
+import type { RepoContent, RepoSymLink } from "src/types/repo";
 
-export const tightenUpContent = (content: readonly GithubContent[]): RepoContent => {
+export function tightenUpContent(content: readonly GithubContent[]): RepoContent {
   const result: RepoContent = {
     dir: "",
     files: [],
     subDirectories: [],
-    otherAssets: []
+    otherAssets: [],
   };
 
-  if(Array.isArray(content)) {
+  if (Array.isArray(content)) {
     for (const c of content) {
-      switch(c.type) {
+      switch (c.type) {
         case "file": {
           result.files.push({
             kind: "file",
@@ -34,22 +34,21 @@ export const tightenUpContent = (content: readonly GithubContent[]): RepoContent
         case "symlink": {
           result?.otherAssets?.push({
             kind: "symlink",
-            sha: c.sha
+            sha: c.sha,
           } as RepoSymLink);
           break;
         }
-        case "submodule": { 
+        case "submodule": {
           result?.otherAssets?.push({
             kind: "submodule",
             sha: c.sha,
-            name: c.name
+            name: c.name,
           });
-        break;
+          break;
         }
       }
     }
   }
 
-
   return result;
-};
+}

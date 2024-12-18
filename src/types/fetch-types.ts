@@ -1,7 +1,6 @@
-
-import { Mapper,  FinalizedMapConfig, Narrowable } from "inferred-types";
-import { HeadersInit } from "node-fetch";
-import { RepoSortDirectionality } from "./repo";
+import type { FinalizedMapConfig, Mapper, Narrowable } from "inferred-types";
+import type { HeadersInit } from "node-fetch";
+import type { RepoSortDirectionality } from "./repo";
 
 /**
  * Whether or not the inputs received from an endpoint are
@@ -19,7 +18,7 @@ export interface FetchGlobalOptions {
    * Default values for common _query parameters_ used in getting info from
    * Git repos.
    */
-  qp?: { 
+  qp?: {
     page?: string;
     per_page?: string;
     direction?: RepoSortDirectionality;
@@ -29,10 +28,10 @@ export interface FetchGlobalOptions {
 /**
  * Options available to any given API request
  */
-export type FetchRequestOptions<QP extends {} = {}, On404 extends Narrowable = void> = {
+export interface FetchRequestOptions<QP extends {} = {}, On404 extends Narrowable = void> {
   /**
    * An API token to include in a particular request.
-   * 
+   *
    * Note: typically you would set ENV variable and have
    * this passed through automatically for all requests.
    */
@@ -47,7 +46,7 @@ export type FetchRequestOptions<QP extends {} = {}, On404 extends Narrowable = v
   qp?: QP;
   headers?: HeadersInit;
   /**
-   * Specify whether content should use the fetch methods `.json()` or 
+   * Specify whether content should use the fetch methods `.json()` or
    * `.text()` methods to extract response payload.
    */
   as?: "json" | "text";
@@ -57,7 +56,7 @@ export type FetchRequestOptions<QP extends {} = {}, On404 extends Narrowable = v
    * the error you can do so by using this configuration item.
    */
   on404?: On404;
-};
+}
 
 export type ValidMapper = string | {};
 
@@ -69,10 +68,10 @@ type Plus404Type<T, T404 extends Narrowable> = undefined extends T404
 
 /**
  * **FetchApi**
- * 
- * A request for a fetch request via the fetch-wrapper provided in 
+ *
+ * A request for a fetch request via the fetch-wrapper provided in
  * this repo.
- * 
+ *
  * ```ts
  * const mapper = mapTo<GithubCommit, RepoCommit>( ... );
  * return fetch(url, "array", mapper, { qp });
@@ -80,9 +79,9 @@ type Plus404Type<T, T404 extends Narrowable> = undefined extends T404
  */
 export type FetchApi = <
   TStructure extends RespCardinality,
-  TMapper extends Mapper<ValidMapper,ValidMapper,FinalizedMapConfig<any, any, any>>,
+  TMapper extends Mapper<ValidMapper, ValidMapper, FinalizedMapConfig<any, any, any>>,
   TQueryParams extends {} = {},
-  TOn404 extends Narrowable = undefined
+  TOn404 extends Narrowable = undefined,
 >(
   /** the request URL you are calling */
   url: string,
@@ -91,21 +90,20 @@ export type FetchApi = <
   /**
    * A mapper function -- generated via the `mapTo` utility in
    * _inferred-types_ -- to map the git hosting services data
-   * back to a common understanding of the API surface this 
+   * back to a common understanding of the API surface this
    * library supports.
    */
   respMapper: TMapper,
   options?: FetchRequestOptions<TQueryParams, TOn404>
 ) => TStructure extends "list"
-    ? Promise<Plus404Type<TMapper["outputType"][], TOn404>>
-    : Promise<Plus404Type<TMapper["outputType"], TOn404>>;
+  ? Promise<Plus404Type<TMapper["outputType"][], TOn404>>
+  : Promise<Plus404Type<TMapper["outputType"], TOn404>>;
 
 /**
  * A higher order function which receives the global configuration
  * and returns the API surface for the **fetch wrapper**.
- * 
+ *
  * This fetch wrapper is used by all of the _providers_ to call their
  * respective APIs.
  */
 export type FetchWrapper = (config: FetchGlobalOptions) => FetchApi;
-

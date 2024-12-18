@@ -1,10 +1,10 @@
-import {  mapTo } from "inferred-types";
+import type { FetchApi, FlatSitemap, GithubBranch, GithubCommit, GithubContent, GithubRepoIssue, GithubRepoMeta, ReadmeMarkdown, Repo, RepoBranch, RepoCommit, RepoContent, RepoFile, RepoIssue, RepoMetadata, RepoProvider, RepoSubmodule, RepoSymLink, Sitemap, SitemapDirectory, SitemapOptions, Url } from "src/types";
+import { mapTo } from "inferred-types";
 import { join } from "pathe";
 import { GITHUB_API_BASE } from "src/constants";
-import {  FetchApi, Repo,  SitemapOptions,  GithubBranch, GithubContent, RepoMetadata, FlatSitemap, Sitemap, SitemapDirectory, RepoFile, GithubRepoMeta, GithubRepoIssue, RepoIssue, RepoProvider, RepoBranch, ReadmeMarkdown, GithubCommit, RepoCommit,  RepoContent, Url, RepoSymLink, RepoSubmodule} from "src/types";
 import { identity } from "src/utils";
 
-const flattenSitemap = (smd: SitemapDirectory): RepoFile[] => {
+function flattenSitemap(smd: SitemapDirectory): RepoFile[] {
   let flat: RepoFile[] = [...smd.files];
 
   for (const dir of smd.subDirectories) {
@@ -15,7 +15,7 @@ const flattenSitemap = (smd: SitemapDirectory): RepoFile[] => {
   }
 
   return flat;
-};
+}
 
 /**
  * Map Github's repo meta to the generalized `RepoMetadata`
@@ -25,19 +25,12 @@ const metaMapper = mapTo.oneToOne().map<GithubRepoMeta, RepoMetadata>(r => r);
 /**
  * recursively moves though repo content on behalf of the sitemap functionality
  */
-const crawler = async <F extends FetchApi>(
-  fetch: F, 
-  repo: Repo, 
-  branch: string, 
-  path: string, 
-  options: SitemapOptions
-): Promise<SitemapDirectory> => {
-  
+async function crawler<F extends FetchApi>(fetch: F, repo: Repo, branch: string, path: string, options: SitemapOptions): Promise<SitemapDirectory> {
   // ensure filters exist
   const fileFilter = options.fileFilter || (() => true);
   const directoryFilter = options.directoryFilter || (() => true);
   // get directory content at path
-  // eslint-disable-next-line no-use-before-define
+
   const content = await api(fetch).getContentInRepo(repo, branch, path);
   let { files, subDirectories } = content;
   // filter
@@ -47,10 +40,10 @@ const crawler = async <F extends FetchApi>(
   const dir: SitemapDirectory = {
     dir: path,
     files,
-    subDirectories: []
+    subDirectories: [],
   };
   // recurse into sub directories
-  if(subDirectories.length > 0) {
+  if (subDirectories.length > 0) {
     const waitFor: Promise<SitemapDirectory>[] = [];
     for (const child of subDirectories) {
       const subDirectory = join(path, `/${child}`);
@@ -60,15 +53,17 @@ const crawler = async <F extends FetchApi>(
   }
 
   return dir;
-};
+}
 
-const rawUrl = (repo: Repo, branch: string, filepath: string) => 
-  `https://raw.githubusercontent.com/${repo}/${branch}/${filepath}` as Url;
+function rawUrl(repo: Repo, branch: string, filepath: string) {
+  return `https://raw.githubusercontent.com/${repo}/${branch}/${filepath}` as Url;
+}
 
-const editorUrl = (repo: Repo, branch: string, filepath: string) => 
-  `https://github.com/${repo}/blob/${branch}/${filepath}` as Url;
+function editorUrl(repo: Repo, branch: string, filepath: string) {
+  return `https://github.com/${repo}/blob/${branch}/${filepath}` as Url;
+}
 
-const api: RepoProvider = (fetch) => ({
+const api: RepoProvider = fetch => ({
   getRepoMeta(repo, options) {
     const url = `${GITHUB_API_BASE}/repos/${repo}`;
     return fetch(url, "singular", metaMapper, options);
@@ -76,12 +71,12 @@ const api: RepoProvider = (fetch) => ({
   getFileContent(repo, branch, filepath) {
     const url = rawUrl(repo, branch, filepath);
     const mapper = mapTo<string, string>(m => [m]);
-    return fetch(url, "singular", mapper, { as: "text"} );
+    return fetch(url, "singular", mapper, { as: "text" });
   },
   async getRepoBranches(repo, options) {
     const url = `${GITHUB_API_BASE}/repos/${repo}/branches`;
     const mapper = mapTo.oneToOne().map<GithubBranch, RepoBranch>(b => b);
-    return fetch(url,"list",mapper, options);
+    return fetch(url, "list", mapper, options);
   },
   async getReadme(repo, branch) {
     const url = rawUrl(repo, branch, "README.md") as Url;
@@ -89,16 +84,16 @@ const api: RepoProvider = (fetch) => ({
       content: "",
       exists: false,
       rawUrl: rawUrl(repo, branch, "README.md"),
-      editorUrl: editorUrl(repo, branch, "README.md")
+      editorUrl: editorUrl(repo, branch, "README.md"),
     };
     const mapper = mapTo
       .oneToOne()
       .map<string, ReadmeMarkdown>(i => ({
         ...readme,
         exists: true,
-        content: i
-      })
-    );
+        content: i,
+      }),
+      );
     return fetch(url, "singular", mapper, { on404: readme, as: "text" });
   },
 
@@ -110,7 +105,7 @@ const api: RepoProvider = (fetch) => ({
       url,
       "list",
       respMapper,
-      options || {}
+      options || {},
     );
   },
 
@@ -121,65 +116,64 @@ const api: RepoProvider = (fetch) => ({
       url,
       "list",
       mapper,
-      options
+      options,
     );
   },
 
   getContentInRepo(repo, branch, path) {
-    const url = 
-      `${GITHUB_API_BASE}/repos/${repo}/contents/${path}?ref=${branch}` as const;
+    const url
+      = `${GITHUB_API_BASE}/repos/${repo}/contents/${path}?ref=${branch}` as const;
 
-    const files = mapTo<GithubContent, RepoFile>(i => 
+    const files = mapTo<GithubContent, RepoFile>(i =>
       i?.type === "file"
-      ?  [{
-          kind: "file",
-          filename: i.name,
-          filepath: i.path.replace(i.name, ""),
-          sha: i.sha,
-          size: i.size,
-          url: i.html_url ? i.html_url as Url : null,
-          raw_url: i.download_url ? i.download_url as Url : null
-      }]
-      : []
+        ? [{
+            kind: "file",
+            filename: i.name,
+            filepath: i.path.replace(i.name, ""),
+            sha: i.sha,
+            size: i.size,
+            url: i.html_url ? i.html_url as Url : null,
+            raw_url: i.download_url ? i.download_url as Url : null,
+          }]
+        : [],
     );
 
-    const subDirectories = mapTo<GithubContent, string>(i => 
+    const subDirectories = mapTo<GithubContent, string>(i =>
       i?.type === "dir"
         ? [i.name]
-        : []
+        : [],
     );
 
-    const symlink = mapTo<GithubContent, RepoSymLink>(i => 
-      i?.type === "symlink" 
+    const symlink = mapTo<GithubContent, RepoSymLink>(i =>
+      i?.type === "symlink"
         ? [{
-          kind: "symlink",
-          sha: i.sha
-        }]
-        : []
+            kind: "symlink",
+            sha: i.sha,
+          }]
+        : [],
     );
 
-    const submodule = mapTo<GithubContent, RepoSubmodule>(i => 
+    const submodule = mapTo<GithubContent, RepoSubmodule>(i =>
       i?.type === "submodule"
         ? [{
-          kind: "submodule",
-          sha: i.sha,
-          name: i.name
-        }]
-        : []
+            kind: "submodule",
+            sha: i.sha,
+            name: i.name,
+          }]
+        : [],
     );
 
     const mapper = mapTo
       .manyToOne()
-      .map<GithubContent, RepoContent>(i => {
-
-      return {
-        dir: path,
-        files: files(i),
-        subDirectories: subDirectories(i),
-        symlinks: symlink(i),
-        submodules: submodule(i)
-      };
-    });
+      .map<GithubContent, RepoContent>((i) => {
+        return {
+          dir: path,
+          files: files(i),
+          subDirectories: subDirectories(i),
+          symlinks: symlink(i),
+          submodules: submodule(i),
+        };
+      });
 
     return fetch(url, "singular", mapper, {});
   },
@@ -195,7 +189,7 @@ const api: RepoProvider = (fetch) => ({
           repo,
           branch,
           path,
-          files: flattenSitemap(root)
+          files: flattenSitemap(root),
         };
 
         return flatMap;
@@ -209,12 +203,12 @@ const api: RepoProvider = (fetch) => ({
     const url = `${GITHUB_API_BASE}/repos/${repo}/issues` as const;
     const mapper = mapTo.oneToOne().map<GithubRepoIssue, RepoIssue>(i => i);
     return fetch(
-      url, 
-      "list", 
+      url,
+      "list",
       mapper,
-      options
+      options,
     );
-  }
+  },
 });
 
 export default api;

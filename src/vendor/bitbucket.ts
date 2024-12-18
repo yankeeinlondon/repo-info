@@ -1,7 +1,6 @@
+import type { RepoProvider } from "src/types";
 
-import { RepoProvider } from "src/types";
-
-const api: RepoProvider = (_fetch) => ({
+const api: RepoProvider = _fetch => ({
   getRepoMeta(_repo, _options) {
     throw new Error("not implemented");
   },

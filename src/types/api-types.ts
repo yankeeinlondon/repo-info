@@ -1,26 +1,25 @@
-/* eslint-disable no-use-before-define */
-import { AlphaNumeric,  Replace, UnionToTuple } from "inferred-types";
-import { FetchRequestOptions, FetchApi } from "./fetch-types";
-import { BitbucketUrl, GithubUrl, GitSource, ReadmeMarkdown, Repo, RepoReference, SitemapOptions, Url } from "./general";
-import { GithubBranch, GithubCommit,  GithubCommitsQueryParams, GithubOrgReposQueryParams, GithubRepoMeta,  } from "./github-types";
-import { RepoBranch, RepoCommit, RepoCommitOptions, RepoCommitsRequest, RepoContent, RepoIssue, RepoIssueRequest, RepoMetadata, RepoMetadataRequest, Sitemap } from "./repo";
+import type { AlphaNumeric, Replace, UnionToTuple } from "inferred-types";
+import type { FetchApi, FetchRequestOptions } from "./fetch-types";
+import type { BitbucketUrl, GithubUrl, GitSource, ReadmeMarkdown, Repo, RepoReference, SitemapOptions, Url } from "./general";
+import type { GithubBranch, GithubCommit, GithubCommitsQueryParams, GithubOrgReposQueryParams, GithubRepoMeta } from "./github-types";
+import type { RepoBranch, RepoCommit, RepoCommitOptions, RepoCommitsRequest, RepoContent, RepoIssue, RepoIssueRequest, RepoMetadata, RepoMetadataRequest, Sitemap } from "./repo";
 
 /**
  * Options provided to consumers in the construction of a RepoInfo API
  */
 export interface RepoOptions<
-  TBranch extends string = "default-branch", 
-  TReadme extends boolean = false, 
-  TCommits extends boolean | RepoCommitOptions = false, 
-  TLoadNow extends boolean = false
->  {
+  TBranch extends string = "default-branch",
+  TReadme extends boolean = false,
+  TCommits extends boolean | RepoCommitOptions = false,
+  TLoadNow extends boolean = false,
+> {
   branch?: TBranch;
   /**
    * It's a good idea to provide an API _user_ and _token_ whenever
    * you use operate with a Repo's API. You may be able to make some
    * requests without it but you will be severely limited in how many
    * requests you can make.
-   * 
+   *
    * **Note:** the user and token will be looked for in the ENV but whatever
    * is passed in a parameter is given precedence.
    */
@@ -44,12 +43,12 @@ export interface RepoOptions<
  * When a user wants to partially apply a repo config but not use that
  * configuration yet, the configuration is stored as a `RepoConfig`.
  */
- export type RepoConfig<
+export interface RepoConfig<
   TRepo extends Repo,
-  TBranch extends string, 
-  TSource extends GitSource, 
-  TWith extends string
-> = {
+  TBranch extends string,
+  TSource extends GitSource,
+  TWith extends string,
+> {
   repo: Readonly<TRepo>;
   branch: Readonly<TBranch>;
   source: Readonly<TSource>;
@@ -58,7 +57,7 @@ export interface RepoOptions<
    * Load the RepoInfo API
    */
   load: () => Promise<RepoApi<TRepo, TBranch, TSource, TWith>>;
-};
+}
 
 export type ToRepo<T extends RepoReference> = T extends Url
   ? ToSource<T> extends "github"
@@ -69,7 +68,6 @@ export type ToRepo<T extends RepoReference> = T extends Url
         ? Replace<T, `https://gitlab.com/`, "">
         : never
   : T;
-
 
 /**
  * Type utility which converts a Repo or Url to a `GitSource`
@@ -86,8 +84,8 @@ export type ToSource<T extends RepoReference> = T extends Url
   : "github";
 
 export type ApiWith<
-  TReadme extends boolean, 
-  TCommits extends boolean | RepoCommitOptions
+  TReadme extends boolean,
+  TCommits extends boolean | RepoCommitOptions,
 > = TReadme extends true
   ? TCommits extends false
     ? "readme"
@@ -101,19 +99,14 @@ export type ApiWith<
  * either `RepoConfig` (lazy eval) or `RepoApi<...>` (immediate eval).
  */
 export type RepoConvert<
-  TRepo extends Repo | Url, 
-  TBranch extends string, 
-  TReadme extends boolean, 
-  TCommits extends boolean | RepoCommitOptions ,
-  TLoadNow extends boolean
+  TRepo extends Repo | Url,
+  TBranch extends string,
+  TReadme extends boolean,
+  TCommits extends boolean | RepoCommitOptions,
+  TLoadNow extends boolean,
 > = TLoadNow extends true
   ? RepoApi<TRepo, TBranch, ToSource<TRepo>, ApiWith<TReadme, TCommits>>
   : RepoConfig<TRepo, TBranch, ToSource<TRepo>, ApiWith<TReadme, TCommits>>;
-
-
-
-
-
 
 /** the Commits based API surface; which depends on whether it's pre-loaded */
 export type CommitsApi<T extends boolean> = T extends true
@@ -121,38 +114,38 @@ export type CommitsApi<T extends boolean> = T extends true
     /**
      * the commits gathered previously and not residing in cache
      */
-    commits: readonly RepoCommit[];
-    /**
-     * Gets the next _page_ of commits using the same options that were 
-     * originally used in the options hash and returns them while also
-     * updating the original API surfaces list of commits in the `commits`
-     * property.
-     */
-    getMoreCommits(): Promise<{ page: number; commits: RepoCommit[] }>;
-  }
+      commits: readonly RepoCommit[];
+      /**
+       * Gets the next _page_ of commits using the same options that were
+       * originally used in the options hash and returns them while also
+       * updating the original API surfaces list of commits in the `commits`
+       * property.
+       */
+      getMoreCommits: () => Promise<{ page: number; commits: RepoCommit[] }>;
+    }
   : {
     /** get the commits from the repo */
-    getCommits<T404 = void>(
-      options?: FetchRequestOptions<GithubCommitsQueryParams, T404>
-    ): Promise<readonly RepoCommit[]>;
-  };
+      getCommits: <T404 = void>(
+        options?: FetchRequestOptions<GithubCommitsQueryParams, T404>
+      ) => Promise<readonly RepoCommit[]>;
+    };
 
 /** the Readme based API surface; which depends on whether it's pre-loaded */
-export type ReadmeApi<W extends boolean> = W extends true 
+export type ReadmeApi<W extends boolean> = W extends true
   ? {
-    readme: ReadmeMarkdown;
-  }
+      readme: ReadmeMarkdown;
+    }
   : {
     /**
      * Get the readme info
      */
-    getReadme(): Promise<ReadmeMarkdown>;
-  };
+      getReadme: () => Promise<ReadmeMarkdown>;
+    };
 
 /**
  * The core API which is unaffected by what is "preloaded"
  */
-export type CoreApi<R extends Repo, B extends string, S extends GitSource> = {
+export interface CoreApi<R extends Repo, B extends string, S extends GitSource> {
   repo: Readonly<R>;
   organization: Readonly<AlphaNumeric>;
   branch: Readonly<B>;
@@ -160,54 +153,54 @@ export type CoreApi<R extends Repo, B extends string, S extends GitSource> = {
   defaultBranch: Readonly<string>;
   meta: Readonly<GithubRepoMeta>;
   listOfBranches: readonly string[];
-  branchInfo: {[key: string]: GithubBranch};
-};
+  branchInfo: { [key: string]: GithubBranch };
+}
 
 /**
  * The part of the API surface which fetches additional info but is never preloaded.
  */
-export type AlwaysFetchApi = {
+export interface AlwaysFetchApi {
   /**
    * Get the raw file content of a particular file in the repo
    */
-  getFileContent(filepath: string): Promise<string>;
+  getFileContent: (filepath: string) => Promise<string>;
 
   /**
    * Get a list of all the repos which reside in the organization you are
    * currently working in.
    */
-  getReposInOrg(options: FetchRequestOptions<GithubOrgReposQueryParams>): Promise<readonly GithubRepoMeta[]>;
+  getReposInOrg: (options: FetchRequestOptions<GithubOrgReposQueryParams>) => Promise<readonly GithubRepoMeta[]>;
   /**
    * Look into a particular directory path of a repo and find the files
    * as well as sub-directories which reside at that depth.
    */
-  getContentInRepo(path: string): Promise<RepoContent>;
+  getContentInRepo: (path: string) => Promise<RepoContent>;
   /**
-   * Build a _sitemap_ of files and directories which reside under the 
+   * Build a _sitemap_ of files and directories which reside under the
    * `root` filepath designated.
    */
-  buildSitemap(root: string, options: SitemapOptions): Promise<Sitemap>;
+  buildSitemap: (root: string, options: SitemapOptions) => Promise<Sitemap>;
 
   /**
    * Get issues from the repository
    */
-  getIssues<T404>(options: FetchRequestOptions<RepoIssueRequest, T404>): Promise<readonly RepoIssue[]>;
-};
+  getIssues: <T404>(options: FetchRequestOptions<RepoIssueRequest, T404>) => Promise<readonly RepoIssue[]>;
+}
 
 /**
  * An API surface for the specified Repo
  */
 export type RepoApi<
-  TRepo extends Repo, 
-  TBranch extends string, 
-  TSource extends GitSource, 
-  TWith extends string = never
-> = CoreApi<TRepo,TBranch,TSource> & 
-  AlwaysFetchApi & 
-  CommitsApi<TWith extends "commits" ? true : false> & 
-  ReadmeApi<TWith extends "readme" ? true : false>;
+  TRepo extends Repo,
+  TBranch extends string,
+  TSource extends GitSource,
+  TWith extends string = never,
+> = CoreApi<TRepo, TBranch, TSource> &
+AlwaysFetchApi &
+CommitsApi<TWith extends "commits" ? true : false> &
+ReadmeApi<TWith extends "readme" ? true : false>;
 
-export type RepoCache<W extends string = ""> = {
+export interface RepoCache<W extends string = ""> {
   cached: W extends "" ? [] : UnionToTuple<W>;
   branches: GithubBranch[];
   meta: GithubRepoMeta;
@@ -215,7 +208,7 @@ export type RepoCache<W extends string = ""> = {
   commits: W extends "commits" ? readonly GithubCommit[] : never;
   readme: W extends "readme" ? ReadmeMarkdown : never;
   reposInOrg: W extends "repos-in-org" ? GithubRepoMeta[] : never;
-};
+}
 
 export type RepoInfo<W extends string = never> = {
   repo: Repo;
@@ -227,7 +220,7 @@ export type RepoInfo<W extends string = never> = {
 /**
  * If you are to provide a vendor/provider implementation then you
  * must export this type as a default export of the give file.
- * 
+ *
  * - It receives a `FetchApi` to make all requests which helps to standardize
  * IO as well as relieve the provider of having to be involved in those details
  * - The main responsibility for each provider is to implement the API surface
@@ -237,70 +230,70 @@ export type RepoInfo<W extends string = never> = {
  */
 export type RepoProvider = (fetch: FetchApi) => ProviderApi;
 
-export type ProviderApi = {
+export interface ProviderApi {
   /**
    * **getRepoMeta**
-   * 
+   *
    * get meta information about a specific hosted Repo.
    */
-  getRepoMeta(repo: Repo, options?: FetchRequestOptions<RepoMetadataRequest>): Promise<RepoMetadata>;
+  getRepoMeta: (repo: Repo, options?: FetchRequestOptions<RepoMetadataRequest>) => Promise<RepoMetadata>;
   /**
    * **getRepoBranches**
-   * 
-   * get all the branches which a repo has along with some meta info on 
+   *
+   * get all the branches which a repo has along with some meta info on
    * each branch.
    */
-  getRepoBranches(
-    repo: Repo, 
+  getRepoBranches: (
+    repo: Repo,
     options?: FetchRequestOptions<GithubOrgReposQueryParams>
-  ): Promise<RepoBranch[]>;
+  ) => Promise<RepoBranch[]>;
   /**
    * **buildSitemap**
-   * 
+   *
    * Builds a hierarchical sitemap structure of files in the repo.
    */
-  buildSitemap(repo: Repo, branch: string, path: string, options?: SitemapOptions): Promise<Sitemap>;
+  buildSitemap: (repo: Repo, branch: string, path: string, options?: SitemapOptions) => Promise<Sitemap>;
   /**
    * **getCommits**
-   * 
+   *
    * Get the _commits_ for a given repo.
    */
-  getCommits<T404>(repo: Repo, options?:FetchRequestOptions<RepoCommitsRequest, T404>): Promise<readonly GithubCommit[]>;
+  getCommits: <T404>(repo: Repo, options?: FetchRequestOptions<RepoCommitsRequest, T404>) => Promise<readonly GithubCommit[]>;
   /**
    * **getFileContent**
-   * 
+   *
    * Get the raw file content of a particular file.
    */
-  getFileContent(repo: Repo, branch: string, filepath: string): Promise<string>;
+  getFileContent: (repo: Repo, branch: string, filepath: string) => Promise<string>;
 
   /**
    * **getReadme**
-   * 
+   *
    * Will return a `ReadmeMarkdown` which includes the _content_ property if the repo
    * has a `README.md` in the root directory.
    */
-  getReadme(repo: Repo, branch: string): Promise<ReadmeMarkdown>;
+  getReadme: (repo: Repo, branch: string) => Promise<ReadmeMarkdown>;
 
   /**
    * **getContentInRepo**
-   * 
-   * Retrieves all files, sub-directories, and even symlinks and other artifacts 
+   *
+   * Retrieves all files, sub-directories, and even symlinks and other artifacts
    * for a _given directory path_ of the repo.
    */
-  getContentInRepo(repo: Repo, branch: string, path: string): Promise<RepoContent>;
+  getContentInRepo: (repo: Repo, branch: string, path: string) => Promise<RepoContent>;
 
   /**
    * **getReposInOrg**
-   * 
+   *
    * Gets meta data for all repos which are part of the the given organization.
    */
-  getReposInOrg<T404>(
-    org: AlphaNumeric, 
+  getReposInOrg: <T404>(
+    org: AlphaNumeric,
     options: FetchRequestOptions<GithubOrgReposQueryParams, T404>
-  ): Promise<readonly GithubRepoMeta[]>;
+  ) => Promise<readonly GithubRepoMeta[]>;
 
   /**
    * Get the Issues raised on the given repo
    */
-  getIssues<T404>(repo: Repo, options: FetchRequestOptions<RepoIssueRequest, T404>): Promise<readonly RepoIssue[]>;
-};
+  getIssues: <T404>(repo: Repo, options: FetchRequestOptions<RepoIssueRequest, T404>) => Promise<readonly RepoIssue[]>;
+}

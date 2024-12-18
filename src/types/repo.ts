@@ -1,5 +1,5 @@
-import { Repo, Url } from "./general";
-import { GithubBranch, GithubCommit, GithubCommitsQueryParams, GithubMetadataRequest,  GithubRepoIssue, GithubRepoIssuesParams, GithubRepoMeta } from "./github-types";
+import type { Repo, Url } from "./general";
+import type { GithubBranch, GithubCommit, GithubCommitsQueryParams, GithubMetadataRequest, GithubRepoIssue, GithubRepoIssuesParams, GithubRepoMeta } from "./github-types";
 
 export interface RepoFile {
   kind: "file";
@@ -30,8 +30,8 @@ export interface RepoSubmodule {
 
 /**
  * Info garnished for a particular directory in a Repo.
- * Unlike `SitemapDirectory` -- which is recursive -- 
- * this data structure only knows the _string_ name 
+ * Unlike `SitemapDirectory` -- which is recursive --
+ * this data structure only knows the _string_ name
  * of the sub-directories.
  */
 export interface RepoContent {
@@ -41,8 +41,8 @@ export interface RepoContent {
   otherAssets?: (RepoSymLink | RepoSubmodule)[];
 }
 
-/** 
- * A recursive structure designed to store directory info of a Sitemap 
+/**
+ * A recursive structure designed to store directory info of a Sitemap
  */
 export interface SitemapDirectory {
   dir: string;
@@ -74,7 +74,6 @@ export interface Sitemap {
  * The sort directionality specified for a query option
  */
 export type RepoSortDirectionality = "asc" | "desc" | undefined;
-
 
 // TODO: abstract this from Github version
 export type RepoCommitsRequest = GithubCommitsQueryParams;

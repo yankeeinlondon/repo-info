@@ -1,4 +1,4 @@
-import { RepoContent, RepoFile } from "./repo";
+import type { RepoContent, RepoFile } from "./repo";
 
 export type Url = `https://${string}`;
 export type Repo = `${string}/${string}`;
@@ -11,7 +11,7 @@ export type RepoReference = Repo | Url;
 /**
  * The platform/host which is hosting the repo
  */
-export type GitSource  = "github" | "bitbucket" | "gitlab" | "unknown";
+export type GitSource = "github" | "bitbucket" | "gitlab" | "unknown";
 
 export interface SitemapOptions {
   /**
@@ -42,4 +42,3 @@ export interface ReadmeMarkdown {
   rawUrl: Url;
   editorUrl: Url;
 }
-

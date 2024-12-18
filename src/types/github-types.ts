@@ -1,12 +1,11 @@
-import { Endpoints } from "@octokit/types";
-import { OptionalProps, SimplifyObject } from "inferred-types";
-
+import type { Endpoints } from "@octokit/types";
+import type { OptionalProps, SimplifyObject } from "inferred-types";
 
 export type GithubRepoIssuesParams = OptionalProps<
   Endpoints["GET /issues"]["parameters"]
 >;
 
-export type GithubRepoIssue = 
+export type GithubRepoIssue =
   Endpoints["GET /issues"]["response"]["data"][0];
 
 /**
@@ -18,9 +17,9 @@ export type GithubRepoMeta =
 /**
  * Query params for getting metadata on repo
  */
- export type GithubMetadataRequest = OptionalProps<
+export type GithubMetadataRequest = OptionalProps<
   Endpoints["GET /repos/{owner}/{repo}"]["parameters"]
- >;
+>;
 
 /**
  * The optional props for Github Commits expressed as query parameters on a GET request.
@@ -58,17 +57,17 @@ export type GithubContentsQueryParams = OptionalProps<
   SimplifyObject<Endpoints["GET /repos/{owner}/{repo}/contents/{path}"]["parameters"]>
 >;
 
-// export type GithubContent = 
+// export type GithubContent =
 //   Endpoints["GET /repos/{owner}/{repo}/contents/{path}"]["response"]["data"][]
 
-export type GithubContent = {
-    type: "file" | "symlink" | "dir" | "submodule";
-    size: number;
-    name: string;
-    path: string;
-    sha: string;
-    url: string;
-    git_url: string | null;
-    html_url: string | null;
-    download_url: string | null;
-};
+export interface GithubContent {
+  type: "file" | "symlink" | "dir" | "submodule";
+  size: number;
+  name: string;
+  path: string;
+  sha: string;
+  url: string;
+  git_url: string | null;
+  html_url: string | null;
+  download_url: string | null;
+}

@@ -1,13 +1,12 @@
+import type { Equal, Expect } from "@type-challenges/utils";
+import type { UnionToTuple } from "inferred-types";
+import type { ApiWith, RepoApi, RepoConfig } from "src/types";
 import { RepoInfo } from "src/RepoInfo";
 import { extractRepoAndSource } from "src/utils";
-import { it, expect, describe } from "vitest";
-import { Expect, Equal } from "@type-challenges/utils";
-import { ApiWith, RepoApi, RepoConfig } from "src/types";
-import { UnionToTuple } from "inferred-types";
+import { describe, expect, it } from "vitest";
 
-describe("API types", () => {
-
-  it("ApiWith utility", () => {
+describe("aPI types", () => {
+  it("apiWith utility", () => {
     type A1 = ApiWith<true, false>;
     type A2 = ApiWith<false, true>; // "commits"
     type A3 = ApiWith<true, true>; // "readme" | "commits"
@@ -46,7 +45,7 @@ describe("API types", () => {
     expect(s3).toBe("gitlab");
   });
 
-  it("The shape of a partially applied API is correct", async () => {
+  it("the shape of a partially applied API is correct", async () => {
     const api = RepoInfo("org/repo", { loadNow: false });
     type A1 = typeof api;
     expect(api.source).toBe("github");
@@ -74,26 +73,26 @@ describe("API types", () => {
       Expect<Equal<A2, RepoConfig<"org/repo", "default-branch", "github", "none">>>,
       Expect<Equal<A3, RepoConfig<"org/repo", "default-branch", "bitbucket", "none">>>,
     ];
-    const cases: cases = [ true, true, true];
+    const cases: cases = [true, true, true];
   });
 
-  it("Loading a partially applied API results in correct type", async() => {
+  it("loading a partially applied API results in correct type", async () => {
     const lazy = RepoInfo("yankeeinlondon/gha");
-    
+
     const repo = await lazy.load();
     type R = typeof repo;
 
     expect(typeof repo.meta).toBe("object");
     expect(repo.meta.name).toBe("gha");
     expect(Array.isArray(repo.listOfBranches)).toBeTruthy();
-    
+
     type cases = [
       Expect<Equal<R, RepoApi<"yankeeinlondon/gha", "default-branch", "github", "none">>>, //
     ];
-    const cases: cases = [ true ];
+    const cases: cases = [true];
   });
 
-  it("loadNow returns immediately with a RepoApi", async() => {
+  it("loadNow returns immediately with a RepoApi", async () => {
     const api = await RepoInfo("yankeeinlondon/gha", { loadNow: true });
     type A = typeof api;
 
@@ -101,9 +100,8 @@ describe("API types", () => {
     expect(typeof api.getCommits).toBe("function");
 
     type cases = [
-      Expect<Equal<A, RepoApi<"yankeeinlondon/gha", "default-branch", "github", "none">>> //
+      Expect<Equal<A, RepoApi<"yankeeinlondon/gha", "default-branch", "github", "none">>>, //
     ];
-    const cases: cases = [ true ];
+    const cases: cases = [true];
   });
-
 });

@@ -1,6 +1,6 @@
-import { GithubUrl } from "./types/general";
+import type { GithubUrl } from "./types/general";
 
-export const isGithubHrl = (s: unknown): s is GithubUrl => {
+export function isGithubHrl(s: unknown): s is GithubUrl {
   const re = /https:\/\/github.com\/\S+\/\S+/;
-  return typeof s === "string" && re.test(s) ? true : false;
-};
+  return !!(typeof s === "string" && re.test(s));
+}
